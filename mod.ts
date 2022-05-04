@@ -1,13 +1,15 @@
 import { assert } from "https://deno.land/std@0.133.0/testing/asserts.ts";
-import * as Denops from "https://deno.land/x/denops_std@v3.3.1/test/mod.ts";
-import type { Denops as DenopsApi } from "https://deno.land/x/denops_std@v3.3.1/mod.ts";
+import type { Denops } from "https://deno.land/x/denops_std@v3.3.1/mod.ts";
+
+import "./env.ts";
+const Denops = await import("https://deno.land/x/denops_std@v3.3.1/test/mod.ts");
 
 export type TestDefinition = Omit<Deno.TestDefinition, "fn"> & {
  fn: (cy: DenocyContext) => void | Promise<void>;
  target?: "vim" | "nvim" | "all" | "any";
 };
 
-type DenocyContext = { denops: DenopsApi } & VimElement & {
+type DenocyContext = { denops: Denops } & VimElement & {
   // source: (filePath: string) => void;
   // open: (filePath: string) => void;
   // window: VimWindowApi;
@@ -15,21 +17,21 @@ type DenocyContext = { denops: DenopsApi } & VimElement & {
 };
 
 const DenocyContext = {
-  from: (denops: DenopsApi) => ({
-      denops,
-      should: {
-        exist: () => assert(true),
-      },
+  from: (denops: Denops): DenocyContext => ({
+    denops,
+    should: {
+      exist: () => assert(true),
+    },
   }),
 }
 
 interface VimElement {
   // get: (selector: string) => VimElement;
   // contains: (content: string | RegExp) => VimElement;
-  should: AssertionApi;
+  should: AssertionInterface;
 }
 
-interface AssertionApi {
+interface AssertionInterface {
   exist: () => void;
   beVisible?: () => void;
 }
@@ -72,7 +74,7 @@ function runTest(t: TestDefinition) {
   Denops.test({
     ...t,
     mode: t.target ?? "any",
-    fn: (denops: DenopsApi) => {
+    fn: (denops: Denops) => {
       const cy = DenocyContext.from(denops);
       t.fn(cy);
     },

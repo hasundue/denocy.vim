@@ -1,4 +1,3 @@
-import "https://deno.land/std@0.133.0/dotenv/load.ts";
 import * as Denocy from "./mod.ts";
 
 Denocy.test("Test basic interfaces of Denocy", (cy) => {
