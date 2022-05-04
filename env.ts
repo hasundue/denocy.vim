@@ -23,8 +23,6 @@ for (const cmd of ["vim", "nvim"]) {
       if (status.success) {
         Deno.env.set(key, cmd);
       }
-
-      proc.close();
     }
     catch {
       // do nothing
