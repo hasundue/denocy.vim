@@ -1,7 +1,7 @@
-import { assert } from "https://deno.land/std@0.133.0/testing/asserts.ts";
+import { assert } from "https://deno.land/std@0.137.0/testing/asserts.ts";
 import type { Denops } from "https://deno.land/x/denops_std@v3.3.1/mod.ts";
 
-import "./env.ts";
+import "./env.ts"; // set environment variables
 const Denops = await import("https://deno.land/x/denops_std@v3.3.1/test/mod.ts");
 
 export type TestDefinition = Omit<Deno.TestDefinition, "fn"> & {
