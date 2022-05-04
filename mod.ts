@@ -7,19 +7,20 @@ export type TestDefinition = Omit<Deno.TestDefinition, "fn"> & {
  target?: "vim" | "nvim" | "all" | "any";
 };
 
-class DenocyContext implements VimElement {
-  denops: DenopsApi;
-  should: VimElement["should"];
+type DenocyContext = { denops: DenopsApi } & VimElement & {
   // source: (filePath: string) => void;
   // open: (filePath: string) => void;
   // window: VimWindowApi;
   // buffer: VimBufferApi;
-  constructor(denops: DenopsApi) {
-    this.denops = denops;
-    this.should = {
-      exist: () => assert(true),
-    };
-  }
+};
+
+const DenocyContext = {
+  from: (denops: DenopsApi) => ({
+      denops,
+      should: {
+        exist: () => assert(true),
+      },
+  }),
 }
 
 interface VimElement {
@@ -71,6 +72,9 @@ function runTest(t: TestDefinition) {
   Denops.test({
     ...t,
     mode: t.target ?? "any",
-    fn: (denops: DenopsApi) => t.fn(new DenocyContext(denops))
+    fn: (denops: DenopsApi) => {
+      const cy = DenocyContext.from(denops);
+      t.fn(cy);
+    },
   });
 }
