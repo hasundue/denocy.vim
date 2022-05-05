@@ -16,8 +16,8 @@ Denocy.test({
   },
 });
 
-Denocy.test("test should.beNvim for nvim", { target: "nvim" }, (vim) => {
-  vim.should.beNvim();
+Denocy.test("test should.beNvim for nvim", { target: "nvim" }, (nvim) => {
+  nvim.should.beNvim();
 });
 
 Denocy.test("test should.not.beNvim for vim", { target: "vim" }, (vim) => {

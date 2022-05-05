@@ -11,57 +11,76 @@ export type TestDefinition = Omit<Deno.TestDefinition, "fn"> & {
 
 type DenopsFunction = (denops: Denops) => void | Promise<void>
 
-abstract class VimElement<ChainerUnion extends Chainer> {
-  readonly abstract denocy: DenocyContext;
-  readonly abstract chainer: Record<ChainerUnion, ChainerFunction>;
-  readonly abstract should: AssertionInterface<ChainerUnion>;
+abstract class VimElement {
+  protected abstract denocy: DenocyContext;
+  protected abstract chainer: ChainerDefinition;
+  abstract should: AbstractAssertionInterface;
 
-  register(fn: DenopsFunction) {
-    this.denocy.fns.push(fn);
+  protected register(fn: DenopsFunction) {
+    this.denocy.register(fn);
     return;
   }
 
-  shouldConstructor() {
-    const chainerEntries = Object.entries(this.chainer) as [ChainerUnion, ChainerFunction][];
+  protected assertionConstructor() {
+    const chainerEntries = Object.entries(this.chainer);
 
     const affirmation = Object.fromEntries(chainerEntries.map(([key, fn]) => ([
       key,
-      () => this.register(async (denops: Denops) => assert(await fn()(denops))),
+      (...args: Parameters<typeof fn>) => this.register(
+        async (denops: Denops) => assert(await fn(...args)(denops))
+      ),
     ])))
 
     const negation = Object.fromEntries(chainerEntries.map(([key, fn]) => ([
       key,
-      () => this.register(async (denops: Denops) => assert(!(await fn()(denops)))),
+      (...args: Parameters<typeof fn>) => this.register(
+        async (denops: Denops) => assert(!(await fn(...args)(denops)))
+      ),
     ])))
 
-    return { ...affirmation, not: negation } as AssertionInterface<ChainerUnion>
+    return { ...affirmation, not: negation };
   }
 }
 
-const Chainer = [
-  "exist",
-  "beNvim",
-] as const;
-
-type Chainer = typeof Chainer[number];
-
-type ChainerFunction = () => (denops: Denops) => unknown | Promise<unknown>;
-type AssertionFunction = () => void;
-
-type AssertionInterface<ChainerUnion extends Chainer> = Record<ChainerUnion, AssertionFunction> & { 
-  not: Record<ChainerUnion, AssertionFunction>
+type ChainerArgs = {
+  exist: [],
+  beNvim: [],
+  // count: [number],
 }
 
-class DenocyContext extends VimElement<"exist" | "beNvim"> {
-  denocy = this;
-  fns: DenopsFunction[] = [];
+type Chainer = keyof ChainerArgs;
 
-  chainer = {
+type ChainerDefinition = {
+  [C in Chainer]?: (...args: ChainerArgs[C]) => (denops: Denops) => unknown | Promise<unknown>;
+};
+
+type ChainerInterface = {
+  [C in Chainer]: (...args: ChainerArgs[C]) => void;
+};
+
+type AssertionInterface<T extends Chainer> = Pick<ChainerInterface, T> & {
+  not: Pick<ChainerInterface, T>
+};
+
+type AbstractAssertionInterface = Partial<ChainerInterface> & {
+  not: Partial<ChainerInterface>
+};
+
+class DenocyContext extends VimElement {
+  protected denocy: DenocyContext = this;
+  protected fns: DenopsFunction[] = [];
+
+  register(fn: DenopsFunction) {
+    this.fns.push(fn);
+    return;
+  }
+
+  protected chainer = {
     exist: () => async (denops: Denops) => await denops.eval("1"),
     beNvim: () => async (denops: Denops) => await denops.eval("has('nvim')"),
   };
 
-  should = this.shouldConstructor();
+  should = this.assertionConstructor() as AssertionInterface<keyof typeof this.chainer>;
 
   // source: (filePath: string) => void;
   // open: (filePath: string) => void;
