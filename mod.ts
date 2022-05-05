@@ -44,7 +44,7 @@ abstract class VimElement {
 
 type ChainerArgs = {
   exist: [],
-  beNvim: [],
+  beNeovim: [],
   // count: [number],
 }
 
@@ -72,7 +72,7 @@ class DenocyContext extends VimElement {
 
   chainer = {
     exist: () => async (denops: Denops) => await denops.eval("1"),
-    beNvim: () => async (denops: Denops) => await denops.eval("has('nvim')"),
+    beNeovim: () => async (denops: Denops) => await denops.eval("has('nvim')"),
   };
 
   should = this.assertionConstructor<keyof typeof this.chainer>();
