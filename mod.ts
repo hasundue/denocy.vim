@@ -21,7 +21,7 @@ abstract class VimElement {
     return;
   }
 
-  assertionConstructor() {
+  assertionConstructor<T extends Chainer>() {
     const chainerEntries = Object.entries(this.chainer);
 
     const affirmation = Object.fromEntries(chainerEntries.map(([key, fn]) => ([
@@ -38,7 +38,7 @@ abstract class VimElement {
       ),
     ])))
 
-    return { ...affirmation, not: negation };
+    return { ...affirmation, not: negation } as AssertionInterface<T>;
   }
 }
 
@@ -75,7 +75,7 @@ class DenocyContext extends VimElement {
     beNvim: () => async (denops: Denops) => await denops.eval("has('nvim')"),
   };
 
-  should = this.assertionConstructor() as AssertionInterface<keyof typeof this.chainer>;
+  should = this.assertionConstructor<keyof typeof this.chainer>();
 
   // source: (filePath: string) => void;
   // open: (filePath: string) => void;
