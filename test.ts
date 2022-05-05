@@ -1,4 +1,4 @@
-import * as Denocy from "./mod.ts";
+import { Denocy } from "./mod.ts";
 
 Denocy.test("test basic interfaces of Denocy", (vim) => {
   vim.should.exist();
