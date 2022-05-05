@@ -83,7 +83,9 @@ function runTest(t: TestDefinition) {
     ...t,
     mode: t.target ?? "any",
     fn: async (denops: Denops) => {
-      await Promise.all(denocy.fns.map(fn => fn(denops)));
+      for (let i = 0; i < denocy.fns.length; i++) {
+        await denocy.fns[i](denops);
+      }
     },
   });
 }
