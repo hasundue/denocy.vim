@@ -12,16 +12,16 @@ export type TestDefinition = Omit<Deno.TestDefinition, "fn"> & {
 type DenopsFunction = (denops: Denops) => void | Promise<void>
 
 abstract class VimElement {
-  protected abstract denocy: DenocyContext;
-  protected abstract chainer: ChainerDefinition;
+  abstract denocy: DenocyContext;
+  abstract chainer: ChainerDefinition;
   abstract should: AbstractAssertionInterface;
 
-  protected register(fn: DenopsFunction) {
-    this.denocy.register(fn);
+  register(fn: DenopsFunction) {
+    this.denocy.fns.push(fn);
     return;
   }
 
-  protected assertionConstructor() {
+  assertionConstructor() {
     const chainerEntries = Object.entries(this.chainer);
 
     const affirmation = Object.fromEntries(chainerEntries.map(([key, fn]) => ([
@@ -67,15 +67,10 @@ type AbstractAssertionInterface = Partial<ChainerInterface> & {
 };
 
 class DenocyContext extends VimElement {
-  protected denocy: DenocyContext = this;
-  protected fns: DenopsFunction[] = [];
+  denocy: DenocyContext = this;
+  fns: DenopsFunction[] = [];
 
-  register(fn: DenopsFunction) {
-    this.fns.push(fn);
-    return;
-  }
-
-  protected chainer = {
+  chainer = {
     exist: () => async (denops: Denops) => await denops.eval("1"),
     beNvim: () => async (denops: Denops) => await denops.eval("has('nvim')"),
   };
@@ -88,8 +83,12 @@ class DenocyContext extends VimElement {
   // buffer: VimBufferApi;
 }
 
+interface Denocy {
+  should: DenocyContext["should"];
+}
+
 type TestOptions = Omit<TestDefinition, "name" | "fn">;
-type TestFunction = (cy: DenocyContext) => void;
+type TestFunction = (cy: Denocy) => void;
 
 export function test(t: TestDefinition): void;
 export function test(name: string, fn: TestFunction): void;
