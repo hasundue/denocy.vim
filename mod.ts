@@ -9,12 +9,12 @@ export type TestDefinition = Omit<Deno.TestDefinition, "fn"> & {
  target?: "vim" | "nvim" | "all" | "any";
 };
 
-type DenocyContext = { denops: Denops } & VimElement & {
+type DenocyContext = { denops: Denops } & VimElement// & {
   // source: (filePath: string) => void;
   // open: (filePath: string) => void;
   // window: VimWindowApi;
   // buffer: VimBufferApi;
-};
+//};
 
 const DenocyContext = {
   from: (denops: Denops): DenocyContext => ({
@@ -26,9 +26,8 @@ const DenocyContext = {
 }
 
 interface VimElement {
-  // get: (selector: string) => VimElement;
-  // contains: (content: string | RegExp) => VimElement;
   should: AssertionInterface;
+  containing?: (content: string | RegExp) => VimElement;
 }
 
 interface AssertionInterface {
