@@ -15,3 +15,11 @@ Denocy.test({
     vim.should.exist();
   },
 });
+
+Denocy.test("test should.beNvim for nvim", { target: "nvim" }, (vim) => {
+  vim.should.beNvim();
+});
+
+Denocy.test("test should.not.beNvim for vim", { target: "vim" }, (vim) => {
+  vim.should.not.beNvim();
+});

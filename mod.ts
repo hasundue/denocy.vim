@@ -11,34 +11,58 @@ export type TestDefinition = Omit<Deno.TestDefinition, "fn"> & {
 
 type DenopsFunction = (denops: Denops) => void | Promise<void>
 
-abstract class VimElement {
+abstract class VimElement<ChainerUnion extends Chainer> {
   readonly abstract denocy: DenocyContext;
+  readonly abstract chainer: Record<ChainerUnion, ChainerFunction>;
+  readonly abstract should: AssertionInterface<ChainerUnion>;
 
   register(fn: DenopsFunction) {
     this.denocy.fns.push(fn);
     return;
   }
+
+  shouldConstructor() {
+    const chainerEntries = Object.entries(this.chainer) as [ChainerUnion, ChainerFunction][];
+
+    const affirmation = Object.fromEntries(chainerEntries.map(([key, fn]) => ([
+      key,
+      () => this.register(async (denops: Denops) => assert(await fn()(denops))),
+    ])))
+
+    const negation = Object.fromEntries(chainerEntries.map(([key, fn]) => ([
+      key,
+      () => this.register(async (denops: Denops) => assert(!(await fn()(denops)))),
+    ])))
+
+    return { ...affirmation, not: negation } as AssertionInterface<ChainerUnion>
+  }
 }
 
-interface VimElementInterface {
-  should: AssertionInterface;
-  containing?: (content: string | RegExp) => VimElement;
+const Chainer = [
+  "exist",
+  "beNvim",
+] as const;
+
+type Chainer = typeof Chainer[number];
+
+type ChainerFunction = () => (denops: Denops) => unknown | Promise<unknown>;
+type AssertionFunction = () => void;
+
+type AssertionInterface<ChainerUnion extends Chainer> = Record<ChainerUnion, AssertionFunction> & { 
+  not: Record<ChainerUnion, AssertionFunction>
 }
 
-interface AssertionInterface {
-  exist: () => void;
-  beVisible?: () => void;
-}
-
-class DenocyContext extends VimElement implements VimElementInterface {
+class DenocyContext extends VimElement<"exist" | "beNvim"> {
   denocy = this;
   fns: DenopsFunction[] = [];
 
-  should = {
-    exist: () => this.register(
-      async (denops) => assert(await denops.eval("1") as number)
-    ),
+  chainer = {
+    exist: () => async (denops: Denops) => await denops.eval("1"),
+    beNvim: () => async (denops: Denops) => await denops.eval("has('nvim')"),
   };
+
+  should = this.shouldConstructor();
+
   // source: (filePath: string) => void;
   // open: (filePath: string) => void;
   // window: VimWindowApi;
