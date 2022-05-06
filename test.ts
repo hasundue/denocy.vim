@@ -24,6 +24,11 @@ Denocy.test("test should.not.beNeovim for vim", { target: "vim" }, (vim) => {
   vim.should.not.beNeovim();
 });
 
+Denocy.test("test BufferProvider", (vim) => {
+  vim.buffer.should.exist();
+  vim.buffer.should.beEmpty();
+});
+
 Denocy.test("test edit", (vim) => {
   vim.edit("./README.md");
   vim.should.not.beEmpty();

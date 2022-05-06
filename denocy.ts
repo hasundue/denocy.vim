@@ -46,6 +46,8 @@ export interface BufferProviderInterface {
 
 class BufferProvider extends VimElement implements BufferProviderInterface {
   chainer = {
+    exist: this.denocy!.chainer.exist,
+
     beEmpty: () => async (denops: Denops) => {
       const list = await vim.getbufinfo(denops);
       ensureArray(list);
@@ -63,6 +65,8 @@ class BufferProvider extends VimElement implements BufferProviderInterface {
       return true;
     },
   };
+
+  should = this.assertionConstructor<keyof typeof this.chainer>();
 
   containing = (content?: string | RegExp): BufferInterface => new Buffer(
     this.denocy!,
@@ -87,8 +91,6 @@ class BufferProvider extends VimElement implements BufferProviderInterface {
       return 0;
     },
   );
-
-  should = this.assertionConstructor<keyof typeof this.chainer>();
 }
 
 interface BufferInterface {
