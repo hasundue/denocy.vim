@@ -27,7 +27,7 @@ export abstract class DenocyObject {
       return Object.fromEntries(transiveEntries.map(([key, fn]) => ([
         key,
         (...arg: Parameters<typeof fn>) => { 
-          const anyArg = arg as [arg: any]; // use any to make deno compiler quiet
+          const anyArg = arg as [arg: any]; // use any for cheating deno compiler
           return this.register(
             async (denops: Denops) => assertFunction(await fn(...anyArg)(denops))
           )
