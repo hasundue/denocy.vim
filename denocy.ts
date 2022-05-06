@@ -17,7 +17,10 @@ export class DenocyContext extends DenocyObject implements Denocy {
     beEmpty: () => this.buffer.intransive.beEmpty(),
   };
 
-  should = this.assertionConstructor<keyof typeof this.intransive>();
+  transive = {
+  };
+
+  should = this.assertionConstructor<keyof typeof this.intransive, keyof typeof this.transive>();
 
   edit = (filePath: string): void => this.register(
     async (denops) => await denops.cmd(`edit ${filePath}`)
@@ -68,9 +71,17 @@ class Buffer extends VimElement {
     },
 
     exist: () => this.getBufnr,
-  }
+  };
 
-  should = this.assertionConstructor<keyof typeof this.intransive>();
+  transive = {
+    include: (content: string | RegExp) => async (denops: Denops) => {
+      const bufnr = await this.getBufnr(denops);
+      const lines = await vim.getbufline(denops, bufnr, 1, "$");
+      return lines.some(line => line.match(content));
+    }
+  };
+
+  should = this.assertionConstructor<keyof typeof this.intransive, keyof typeof this.transive>();
   
   containing = (content?: string | RegExp): BufferInterface => new Buffer(
     this.denocy,
