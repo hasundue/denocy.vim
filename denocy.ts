@@ -30,7 +30,7 @@ export class DenocyContext extends DenocyObject implements Denocy {
     }
   );
 
-  buffer = new BufferProvider(this);
+  buffer = new Buffer(this);
 
   // source: (filePath: string) => void;
   // window: VimWindowApi;
@@ -38,35 +38,40 @@ export class DenocyContext extends DenocyObject implements Denocy {
 
 export type DenopsFunction = (denops: Denops) => void | Promise<void>
 
-export interface BufferProviderInterface {
-  containing: BufferProvider["containing"];
-  should: BufferProvider["should"];
+export interface BufferInterface {
+  containing: Buffer["containing"];
+  should: Buffer["should"];
 }
 
-class BufferProvider extends VimElement implements BufferProviderInterface {
+class Buffer extends VimElement {
+  getBufnr: (denops: Denops) => number | Promise<number>;
+
+  constructor(denocy: DenocyContext, getBufnr: (denops: Denops) => number | Promise<number>);
+  constructor(denocy: DenocyContext);
+
+  constructor(denocy: DenocyContext, getBufnr?: (denops: Denops) => number | Promise<number>) {
+    super(denocy);
+
+    if (getBufnr) {
+      this.getBufnr = getBufnr;
+    }
+    else {
+      this.getBufnr = async (denops) => await vim.bufnr(denops);
+    }
+  }
+
   chainer = {
-    exist: this.denocy.chainer.exist,
-
     beEmpty: () => async (denops: Denops) => {
-      const list = await vim.getbufinfo(denops);
-      ensureArray(list);
-
-      for (const buf of list) {
-        ensureLike({ bufnr: 0 }, buf);
-
-        const lines = await vim.getbufline(denops, buf.bufnr, 1, "$");
-
-        if (lines.some(line => line.length)) {
-          return false;
-        }
-      }
-
-      return true;
+      const bufnr = await this.getBufnr(denops);
+      const lines = await vim.getbufline(denops, bufnr, 1, "$");
+      return lines.some(line => !line.length);
     },
-  };
+
+    exist: () => this.getBufnr,
+  }
 
   should = this.assertionConstructor<keyof typeof this.chainer>();
-
+  
   containing = (content?: string | RegExp): BufferInterface => new Buffer(
     this.denocy,
     async (denops) => {
@@ -90,29 +95,4 @@ class BufferProvider extends VimElement implements BufferProviderInterface {
       return 0;
     },
   );
-}
-
-interface BufferInterface {
-  should: Buffer["should"];
-}
-
-class Buffer extends VimElement {
-  getBufnr: (denops: Denops) => number | Promise<number>;
-
-  constructor(denocy: DenocyContext, getBufnr: (denops: Denops) => number | Promise<number>) {
-    super(denocy);
-    this.getBufnr = getBufnr;
-  }
-
-  chainer = {
-    beEmpty: () => async (denops: Denops) => {
-      const bufnr = await this.getBufnr(denops);
-      const lines = await vim.getbufline(denops, bufnr, 1, "$");
-      return lines.some(line => !line.length);
-    },
-
-    exist: () => this.getBufnr,
-  }
-
-  should = this.assertionConstructor<keyof typeof this.chainer>();
 }
