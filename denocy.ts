@@ -111,6 +111,8 @@ class Buffer extends VimElement {
       const lines = await vim.getbufline(denops, bufnr, 1, "$");
       return lines.some(line => !line.length);
     },
+
+    exist: () => this.getBufnr,
   }
 
   should = this.assertionConstructor<keyof typeof this.chainer>();

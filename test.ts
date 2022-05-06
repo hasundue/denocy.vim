@@ -34,3 +34,9 @@ Denocy.test("test edit", (vim) => {
   vim.should.not.beEmpty();
   vim.buffer.should.not.beEmpty();
 });
+
+Denocy.test("test containing", (vim) => {
+  vim.edit("./README.md");
+  vim.buffer.containing("denocy.vim").should.exist();
+  vim.buffer.containing("denocy is the worst").should.not.exist();
+});
