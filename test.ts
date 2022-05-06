@@ -31,7 +31,6 @@ Denocy.test("BufferProvider", (vim) => {
 
 Denocy.test("edit", (vim) => {
   vim.edit("./README.md");
-  vim.should.not.beEmpty();
   vim.buffer.should.not.beEmpty();
 });
 

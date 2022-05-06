@@ -11,10 +11,12 @@ export class DenocyContext extends DenocyObject implements Denocy {
     this.fns.push(fn);
   }
 
+  // window: new Window(this);
+  buffer = new Buffer(this);
+
   intransive = {
     exist: () => async (denops: Denops) => await denops.eval("1"),
     beNeovim: () => async (denops: Denops) => await denops.eval("has('nvim')"),
-    beEmpty: () => this.buffer.intransive.beEmpty(),
   };
 
   transive = {
@@ -33,10 +35,7 @@ export class DenocyContext extends DenocyObject implements Denocy {
     }
   );
 
-  buffer = new Buffer(this);
-
   // source: (filePath: string) => void;
-  // window: VimWindowApi;
 }
 
 export type DenopsFunction = (denops: Denops) => void | Promise<void>
