@@ -88,7 +88,7 @@ class Buffer extends VimElement {
 
   should = this.assertionConstructor<keyof typeof this.intransive, keyof typeof this.transive>();
   
-  containing = (content?: string | RegExp): BufferInterface => new Buffer(
+  containing = (content: string | RegExp): BufferInterface => new Buffer(
     this.denocy,
     async (denops) => {
       const list = await vim.getbufinfo(denops);
@@ -96,8 +96,6 @@ class Buffer extends VimElement {
 
       for (const buf of list) {
         ensureLike({ bufnr: 0 }, buf);
-
-        if (!content) return buf.bufnr;
 
         const lines = await vim.getbufline(denops, buf.bufnr, 1, "$");
 
