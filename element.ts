@@ -3,27 +3,15 @@ import type { Denops } from "https://deno.land/x/denops_std@v3.3.1/mod.ts";
 import { DenocyContext, DenopsFunction } from "./denocy.ts";
 
 export abstract class DenocyObject {
-  abstract intransive: IntransiveDefinition;
-  abstract transive: TransiveDefinition;
+  abstract verbs: AssertionVerbDefinition;
   abstract should: unknown; // should be AssertionInterface<string>
 
   abstract register(fn: DenopsFunction): void;
 
-  assertionConstructor<I extends string, T extends Transive>() {
-    const intransiveEntries = Object.entries(this.intransive);
+  assertionConstructor<T extends AssertionVerb>() {
+    const transiveEntries = Object.entries(this.verbs);
 
-    const constructIntransive = (assertFunction: typeof assert) => {
-      return Object.fromEntries(intransiveEntries.map(([key, fn]) => ([
-        key,
-        () => this.register(
-          async (denops: Denops) => assertFunction(await fn()(denops))
-        ),
-      ])))
-    };
-
-    const transiveEntries = Object.entries(this.transive);
-
-    const constructTransive = (assertFunction: typeof assert) => {
+    const constructAssertionVerb = (assertFunction: typeof assert) => {
       return Object.fromEntries(transiveEntries.map(([key, fn]) => ([
         key,
         (...arg: Parameters<typeof fn>) => { 
@@ -36,13 +24,9 @@ export abstract class DenocyObject {
     };
 
     return {
-      ...constructIntransive((arg) => assert(arg)),
-      ...constructTransive((arg) => assert(arg)),
-      not: { 
-        ...constructIntransive((arg) => assert(!arg)),
-        ...constructTransive((arg) => assert(!arg)),
-      }
-    } as AssertionInterface<I, T>;
+      ...constructAssertionVerb((arg) => assert(arg)),
+      not: constructAssertionVerb((arg) => assert(!arg)),
+    } as unknown as AssertionInterface<T>;
   }
 }
 
@@ -60,35 +44,25 @@ export abstract class VimElement extends DenocyObject {
   }
 }
 
-type IntransiveDefinition = {
-  [key: string]: () => (denops: Denops) => unknown | Promise<unknown>;
-};
-
-type IntransiveInterface<K extends string> = {
-  [key in K]: () => void;
-};
-
-type TransiveFunction = {
-  include: (content: string | RegExp) => (denops: Denops) => unknown | Promise<unknown>;
-  onlyInclude: (content: string) => (denops: Denops) => unknown | Promise<unknown>;
-}
-
-type TransiveFunctionArgs = {
+type AssertionVerbArgs = {
+  exist: [];
+  beNeovim: [];
+  beEmpty: [];
   include: [content: string | RegExp];
   onlyInclude: [content: string];
 }
 
-type Transive = keyof TransiveFunction;
+type AssertionVerb = keyof AssertionVerbArgs;
 
-type TransiveDefinition = {
-  [key in Transive]?: TransiveFunction[key];
+type AssertionVerbDefinition = {
+  [key in AssertionVerb]?: 
+    (...args: AssertionVerbArgs[key]) => (denops: Denops) => unknown | Promise<unknown>;
 };
 
-type TransiveInterface<K extends Transive> = {
-  [key in K]: (...args: TransiveFunctionArgs[key]) => void;
+type AssertionVerbInterface<T extends AssertionVerb> = {
+  [key in T]: (...args: AssertionVerbArgs[key]) => void;
 };
 
-type AssertionInterface<I extends string, T extends Transive> = 
-  IntransiveInterface<I> & TransiveInterface<T> & {
-  not: IntransiveInterface<I> & TransiveInterface<T>,
+type AssertionInterface<T extends AssertionVerb> = AssertionVerbInterface<T> & {
+  not: AssertionVerbInterface<T>,
 }

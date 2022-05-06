@@ -14,15 +14,12 @@ export class DenocyContext extends DenocyObject implements Denocy {
   // window: new Window(this);
   buffer = new Buffer(this);
 
-  intransive = {
+  verbs = {
     exist: () => async (denops: Denops) => await denops.eval("1"),
     beNeovim: () => async (denops: Denops) => await denops.eval("has('nvim')"),
   };
 
-  transive = {
-  };
-
-  should = this.assertionConstructor<keyof typeof this.intransive, keyof typeof this.transive>();
+  should = this.assertionConstructor<keyof typeof this.verbs>();
 
   edit = (filePath: string): void => this.register(
     async (denops) => await denops.cmd(`edit ${filePath}`)
@@ -62,17 +59,15 @@ class Buffer extends VimElement {
     }
   }
 
-  intransive = {
+  verbs = {
+    exist: () => this.getBufnr,
+
     beEmpty: () => async (denops: Denops) => {
       const bufnr = await this.getBufnr(denops);
       const lines = await vim.getbufline(denops, bufnr, 1, "$");
       return lines.some(line => !line.length);
     },
 
-    exist: () => this.getBufnr,
-  };
-
-  transive = {
     include: (content: string | RegExp) => async (denops: Denops) => {
       const bufnr = await this.getBufnr(denops);
       const lines = await vim.getbufline(denops, bufnr, 1, "$");
@@ -86,7 +81,7 @@ class Buffer extends VimElement {
     },
   };
 
-  should = this.assertionConstructor<keyof typeof this.intransive, keyof typeof this.transive>();
+  should = this.assertionConstructor<keyof typeof this.verbs>();
   
   containing = (content: string | RegExp): BufferInterface => new Buffer(
     this.denocy,
