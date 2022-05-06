@@ -9,7 +9,7 @@ export abstract class DenocyObject {
 
   abstract register(fn: DenopsFunction): void;
 
-  assertionConstructor<I extends string, T extends string>() {
+  assertionConstructor<I extends string, T extends Transive>() {
     const intransiveEntries = Object.entries(this.intransive);
 
     const constructIntransive = (assertFunction: typeof assert) => {
@@ -26,9 +26,12 @@ export abstract class DenocyObject {
     const constructTransive = (assertFunction: typeof assert) => {
       return Object.fromEntries(transiveEntries.map(([key, fn]) => ([
         key,
-        (...arg: Parameters<typeof fn>) => this.register(
-          async (denops: Denops) => assertFunction(await fn(...arg)(denops))
-        ),
+        (...arg: Parameters<typeof fn>) => { 
+          const anyArg = arg as [arg: any]; // use any to make deno compiler quiet
+          return this.register(
+            async (denops: Denops) => assertFunction(await fn(...anyArg)(denops))
+          )
+        },
       ])))
     };
 
@@ -65,15 +68,27 @@ type IntransiveInterface<K extends string> = {
   [key in K]: () => void;
 };
 
+type TransiveFunction = {
+  include: (content: string | RegExp) => (denops: Denops) => unknown | Promise<unknown>;
+  onlyInclude: (content: string) => (denops: Denops) => unknown | Promise<unknown>;
+}
+
+type TransiveFunctionArgs = {
+  include: [content: string | RegExp];
+  onlyInclude: [content: string];
+}
+
+type Transive = keyof TransiveFunction;
+
 type TransiveDefinition = {
-  [key: string]: (arg: any) => (denops: Denops) => unknown | Promise<unknown>;
+  [key in Transive]?: TransiveFunction[key];
 };
 
-type TransiveInterface<K extends string> = {
-  [key in K]: (arg: unknown) => void;
+type TransiveInterface<K extends Transive> = {
+  [key in K]: (...args: TransiveFunctionArgs[key]) => void;
 };
 
-type AssertionInterface<I extends string, T extends string> = 
+type AssertionInterface<I extends string, T extends Transive> = 
   IntransiveInterface<I> & TransiveInterface<T> & {
   not: IntransiveInterface<I> & TransiveInterface<T>,
 }
