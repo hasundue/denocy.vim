@@ -4,7 +4,7 @@ import { DenocyContext, DenopsFunction } from "./denocy.ts";
 
 export abstract class DenocyObject {
   abstract verbs: AssertionVerbDefinition;
-  abstract should: unknown; // should be AssertionInterface<string>
+  abstract should: AbstractAssertionInterface;
 
   abstract register(fn: DenopsFunction): void;
 
@@ -50,7 +50,7 @@ type AssertionVerbArgs = {
   beEmpty: [];
   include: [content: string | RegExp];
   onlyInclude: [content: string];
-}
+};
 
 type AssertionVerb = keyof AssertionVerbArgs;
 
@@ -65,4 +65,8 @@ type AssertionVerbInterface<T extends AssertionVerb> = {
 
 type AssertionInterface<T extends AssertionVerb> = AssertionVerbInterface<T> & {
   not: AssertionVerbInterface<T>,
-}
+};
+
+type AbstractAssertionInterface = Partial<AssertionVerbInterface<AssertionVerb>> & {
+  not: Partial<AssertionVerbInterface<AssertionVerb>>
+};
