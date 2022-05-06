@@ -81,9 +81,7 @@ class Buffer extends VimElement {
       for (const buf of list) {
         ensureLike({ bufnr: 0 }, buf);
 
-        if (!content) {
-          return buf.bufnr;
-        }
+        if (!content) return buf.bufnr;
 
         const lines = await vim.getbufline(denops, buf.bufnr, 1, "$");
 
