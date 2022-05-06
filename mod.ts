@@ -8,6 +8,7 @@ import { DenocyContext } from "./denocy.ts";
 export interface Denocy {
   should: DenocyContext["should"];
   edit: DenocyContext["edit"];
+  // buffer: DenocyContext["buffer"];
 }
 
 export const Denocy = {
