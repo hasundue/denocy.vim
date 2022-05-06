@@ -78,7 +78,13 @@ class Buffer extends VimElement {
       const bufnr = await this.getBufnr(denops);
       const lines = await vim.getbufline(denops, bufnr, 1, "$");
       return lines.some(line => line.match(content));
-    }
+    },
+
+    onlyInclude: (content: string) => async (denops: Denops) => {
+      const bufnr = await this.getBufnr(denops);
+      const lines = await vim.getbufline(denops, bufnr, 1, "$");
+      return lines.length === 1 && lines[0] === content;
+    },
   };
 
   should = this.assertionConstructor<keyof typeof this.intransive, keyof typeof this.transive>();

@@ -49,3 +49,8 @@ Denocy.test("include", (vim) => {
   vim.edit("./README.md");
   buf.should.include("denocy.vim");
 });
+
+Denocy.test("onlyInclude", (vim) => {
+  vim.edit("./README.md");
+  vim.buffer.should.not.onlyInclude("denocy.vim");
+});
