@@ -3,11 +3,11 @@ import type { Denops } from "https://deno.land/x/denops_std@v3.3.1/mod.ts";
 import { DenocyContext, DenopsFunction } from "./denocy.ts";
 
 export abstract class VimElement {
-  denocy?: DenocyContext;
+  denocy?: DenocyContext; // must not be undefined
   abstract chainer: ChainerDefinition;
   abstract should: unknown; // should be AssertionInterface<string>
 
-  constructor(denocy?: DenocyContext) {
+  constructor(denocy?: DenocyContext) { // the argument is needed except for DenocyContext
     this.denocy = denocy;
   }
 
