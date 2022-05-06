@@ -2,19 +2,11 @@ import { assert } from "https://deno.land/std@0.137.0/testing/asserts.ts";
 import type { Denops } from "https://deno.land/x/denops_std@v3.3.1/mod.ts";
 import { DenocyContext, DenopsFunction } from "./denocy.ts";
 
-export abstract class VimElement {
-  denocy?: DenocyContext; // must not be undefined
+export abstract class DenocyObject {
   abstract chainer: ChainerDefinition;
   abstract should: unknown; // should be AssertionInterface<string>
 
-  constructor(denocy?: DenocyContext) { // the argument is needed except for DenocyContext
-    this.denocy = denocy;
-  }
-
-  register(fn: DenopsFunction) {
-    this.denocy!.fns.push(fn);
-    return;
-  }
+  abstract register(fn: DenopsFunction): void;
 
   assertionConstructor<K extends string>() {
     const chainerEntries = Object.entries(this.chainer);
@@ -32,6 +24,20 @@ export abstract class VimElement {
       ...construct((arg) => assert(arg)),
       not: construct((arg) => assert(!arg)),
     } as AssertionInterface<K>;
+  }
+}
+
+export abstract class VimElement extends DenocyObject {
+  denocy: DenocyContext;
+
+  constructor(denocy: DenocyContext) {
+    super();
+    this.denocy = denocy;
+  }
+
+  register(fn: DenopsFunction) {
+    this.denocy.fns.push(fn);
+    return;
   }
 }
 

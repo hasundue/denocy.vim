@@ -2,14 +2,13 @@ import { ensureLike, ensureArray } from "https://deno.land/x/unknownutil@v1.1.4/
 import type { Denops } from "https://deno.land/x/denops_std@v3.3.1/mod.ts";
 import * as vim from "https://deno.land/x/denops_std@v3.3.1/function/mod.ts";
 import type { Denocy } from "./mod.ts";
-import { VimElement } from "./element.ts";
+import { DenocyObject, VimElement } from "./element.ts";
 
-export class DenocyContext extends VimElement implements Denocy {
+export class DenocyContext extends DenocyObject implements Denocy {
   fns: DenopsFunction[] = [];
 
-  constructor() {
-    super();
-    this.denocy = this;
+  register(fn: DenopsFunction) {
+    this.fns.push(fn);
   }
 
   chainer = {
@@ -46,7 +45,7 @@ export interface BufferProviderInterface {
 
 class BufferProvider extends VimElement implements BufferProviderInterface {
   chainer = {
-    exist: this.denocy!.chainer.exist,
+    exist: this.denocy.chainer.exist,
 
     beEmpty: () => async (denops: Denops) => {
       const list = await vim.getbufinfo(denops);
@@ -69,7 +68,7 @@ class BufferProvider extends VimElement implements BufferProviderInterface {
   should = this.assertionConstructor<keyof typeof this.chainer>();
 
   containing = (content?: string | RegExp): BufferInterface => new Buffer(
-    this.denocy!,
+    this.denocy,
     async (denops) => {
       const list = await vim.getbufinfo(denops);
       ensureArray(list);
