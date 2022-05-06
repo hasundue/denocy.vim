@@ -3,16 +3,16 @@ import type { Denops } from "https://deno.land/x/denops_std@v3.3.1/mod.ts";
 import { DenocyContext, DenopsFunction } from "./denocy.ts";
 
 export abstract class DenocyObject {
-  abstract chainer: ChainerDefinition;
+  abstract intransive: IntransiveDefinition;
   abstract should: unknown; // should be AssertionInterface<string>
 
   abstract register(fn: DenopsFunction): void;
 
   assertionConstructor<K extends string>() {
-    const chainerEntries = Object.entries(this.chainer);
+    const intransiveEntries = Object.entries(this.intransive);
 
     const construct = (assertFunction: typeof assert) => {
-      return Object.fromEntries(chainerEntries.map(([key, fn]) => ([
+      return Object.fromEntries(intransiveEntries.map(([key, fn]) => ([
         key,
         () => this.register(
           async (denops: Denops) => assertFunction(await fn()(denops))
@@ -41,14 +41,14 @@ export abstract class VimElement extends DenocyObject {
   }
 }
 
-type ChainerDefinition = {
+type IntransiveDefinition = {
   [key: string]: () => (denops: Denops) => unknown | Promise<unknown>;
 };
 
-type ChainerInterface<K extends string> = {
+type IntransiveInterface<K extends string> = {
   [key in K]: () => void;
 };
 
-type AssertionInterface<K extends string> = ChainerInterface<K> & {
-  not: ChainerInterface<K>,
+type AssertionInterface<K extends string> = IntransiveInterface<K> & {
+  not: IntransiveInterface<K>,
 }
