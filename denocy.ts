@@ -31,7 +31,7 @@ export class DenocyContext extends VimElement implements Denocy {
     }
   );
 
-  buffer = new BufferInterface(this);
+  buffer = new BufferProvider(this);
 
   // source: (filePath: string) => void;
   // window: VimWindowApi;
@@ -39,12 +39,32 @@ export class DenocyContext extends VimElement implements Denocy {
 
 export type DenopsFunction = (denops: Denops) => void | Promise<void>
 
-class BufferInterface extends VimElement {
+export interface BufferProviderInterface {
+  containing: BufferProvider["containing"];
+  should: BufferProvider["should"];
+}
+
+class BufferProvider extends VimElement implements BufferProviderInterface {
   chainer = {
-    beEmpty: () => this.containing().chainer.beEmpty(),
+    beEmpty: () => async (denops: Denops) => {
+      const list = await vim.getbufinfo(denops);
+      ensureArray(list);
+
+      for (const buf of list) {
+        ensureLike({ bufnr: 0 }, buf);
+
+        const lines = await vim.getbufline(denops, buf.bufnr, 1, "$");
+
+        if (lines.some(line => line.length)) {
+          return false;
+        }
+      }
+
+      return true;
+    },
   };
 
-  containing = (content?: string | RegExp) => new Buffer(
+  containing = (content?: string | RegExp): BufferInterface => new Buffer(
     this.denocy!,
     async (denops) => {
       const list = await vim.getbufinfo(denops);
@@ -69,6 +89,10 @@ class BufferInterface extends VimElement {
   );
 
   should = this.assertionConstructor<keyof typeof this.chainer>();
+}
+
+interface BufferInterface {
+  should: Buffer["should"];
 }
 
 class Buffer extends VimElement {

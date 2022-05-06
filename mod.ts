@@ -3,12 +3,13 @@ import type { Denops } from "https://deno.land/x/denops_std@v3.3.1/mod.ts";
 import "./env.ts"; // set environment variables
 const Denops = await import("https://deno.land/x/denops_std@v3.3.1/test/mod.ts");
 
-import { DenocyContext } from "./denocy.ts";
+import { DenocyContext, BufferProviderInterface } from "./denocy.ts";
 
 export interface Denocy {
   should: DenocyContext["should"];
+  buffer: BufferProviderInterface;
+
   edit: DenocyContext["edit"];
-  buffer: DenocyContext["buffer"];
   echo: DenocyContext["echo"];
 }
 
