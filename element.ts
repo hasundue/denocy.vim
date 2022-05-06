@@ -14,8 +14,8 @@ export abstract class DenocyObject {
     const constructAssertionVerb = (assertFunction: typeof assert) => {
       return Object.fromEntries(transiveEntries.map(([key, fn]) => ([
         key,
-        (...arg: Parameters<typeof fn>) => { 
-          const anyArg = arg as [arg: any]; // use any for cheating deno compiler
+        (...args: Parameters<typeof fn>) => { 
+          const anyArg = args as [arg: any]; // use any for cheating deno compiler
           return this.register(
             async (denops: Denops) => assertFunction(await fn(...anyArg)(denops))
           )
