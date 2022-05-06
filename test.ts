@@ -37,7 +37,7 @@ Denocy.test("edit", (vim) => {
 Denocy.test("containing", (vim) => {
   vim.edit("./README.md");
   vim.buffer.containing("denocy.vim").should.exist();
-  vim.buffer.containing("denocy is the worst").should.not.exist();
+  vim.buffer.containing("denocy is garbage").should.not.exist();
 });
 
 Denocy.test("include", (vim) => {
