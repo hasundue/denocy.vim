@@ -42,8 +42,11 @@ export class DenocyContext extends VimElement implements Denocy {
 
   should = this.assertionConstructor<keyof typeof this.chainer>();
 
+  edit = (filePath: string): void => this.register(
+    async (denops: Denops) => await denops.cmd(`edit ${filePath}`)
+  );
+
   // source: (filePath: string) => void;
-  // open: (filePath: string) => void;
   // window: VimWindowApi;
   // buffer: VimBufferApi;
 }

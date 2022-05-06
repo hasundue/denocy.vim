@@ -23,3 +23,7 @@ Denocy.test("test should.beNeovim for nvim", { target: "nvim" }, (nvim) => {
 Denocy.test("test should.not.beNeovim for vim", { target: "vim" }, (vim) => {
   vim.should.not.beNeovim();
 });
+
+Denocy.test("test open and beEmpty", (vim) => {
+  vim.edit("./README.md");
+});
