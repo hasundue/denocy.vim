@@ -24,7 +24,7 @@ test("Denocy (vim)", { target: "vim" }, (vim) => {
   vim.should.not.beNeovim();
 });
 
-test("BufferProvider", (vim) => {
+test("Buffer", (vim) => {
   vim.buffer.should.exist();
   vim.buffer.should.beEmpty();
 });
@@ -35,6 +35,7 @@ test("edit", (vim) => {
 });
 
 test("containing", (vim) => {
+  vim.buffer.containing("denocy.vim").should.not.exist();
   vim.edit("./README.md");
   vim.buffer.containing("denocy.vim").should.exist();
   vim.buffer.containing("denocy is garbage").should.not.exist();
@@ -42,9 +43,7 @@ test("containing", (vim) => {
 
 test("include", (vim) => {
   const buf = vim.buffer;
-
   buf.should.not.include("denocy.vim");
-
   vim.edit("./README.md");
   buf.should.include("denocy.vim");
 });
@@ -54,6 +53,6 @@ test("onlyInclude", (vim) => {
   vim.buffer.should.not.onlyInclude("denocy.vim");
 });
 
-test("window", (vim) => {
+test("Window", (vim) => {
   vim.window.should.exist();
 });
