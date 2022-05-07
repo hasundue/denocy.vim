@@ -3,20 +3,7 @@ import type { Denops } from "https://deno.land/x/denops_std@v3.3.1/mod.ts";
 import "./env.ts"; // set environment variables
 const Denops = await import("https://deno.land/x/denops_std@v3.3.1/test/mod.ts");
 
-import { DenocyContext, BufferInterface } from "./denocy.ts";
-
-export interface Denocy {
-  buffer: BufferInterface;
-
-  should: DenocyContext["should"];
-
-  edit: DenocyContext["edit"];
-  echo: DenocyContext["echo"];
-}
-
-export const Denocy = {
-  test,
-}
+import { Denocy, DenocyContext } from "./denocy.ts";
 
 export type TestDefinition = Omit<Deno.TestDefinition, "fn"> & {
  fn: TestFunction;
@@ -26,11 +13,11 @@ export type TestDefinition = Omit<Deno.TestDefinition, "fn"> & {
 type TestOptions = Omit<TestDefinition, "name" | "fn">;
 type TestFunction = (cy: Denocy) => void;
 
-function test(t: TestDefinition): void;
-function test(name: string, fn: TestFunction): void;
-function test(name: string, options: TestOptions, fn: TestFunction): void;
+export function test(t: TestDefinition): void;
+export function test(name: string, fn: TestFunction): void;
+export function test(name: string, options: TestOptions, fn: TestFunction): void;
 
-function test(
+export function test(
   arg1: TestDefinition | string,
   arg2?: TestFunction | TestOptions,
   arg3?: TestFunction,

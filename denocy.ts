@@ -1,8 +1,12 @@
 import { ensureLike, ensureArray } from "https://deno.land/x/unknownutil@v1.1.4/mod.ts";
 import type { Denops } from "https://deno.land/x/denops_std@v3.3.1/mod.ts";
 import * as vim from "https://deno.land/x/denops_std@v3.3.1/function/mod.ts";
-import type { Denocy } from "./mod.ts";
-import { DenocyObject, VimElement } from "./element.ts";
+import { DenocyObject, VimElement, VimElementInterface } from "./element.ts";
+
+export type Denocy = {
+  buffer: BufferInterface;
+  window: WindowInterface;
+} & Omit<DenocyContext, "fns" | "register" | "window" | "buffer">;
 
 export class DenocyContext extends DenocyObject implements Denocy {
   fns: DenopsFunction[] = [];
@@ -11,10 +15,10 @@ export class DenocyContext extends DenocyObject implements Denocy {
     this.fns.push(fn);
   }
 
-  // window: new Window(this);
+  window = new Window(this);
   buffer = new Buffer(this);
 
-  verbs = {
+  protected verbs = {
     exist: () => async (denops: Denops) => await denops.eval("1"),
     beNeovim: () => async (denops: Denops) => await denops.eval("has('nvim')"),
   };
@@ -37,10 +41,7 @@ export class DenocyContext extends DenocyObject implements Denocy {
 
 export type DenopsFunction = (denops: Denops) => void | Promise<void>
 
-export interface BufferInterface {
-  containing: Buffer["containing"];
-  should: Buffer["should"];
-}
+type BufferInterface = VimElementInterface<Buffer>;
 
 class Buffer extends VimElement {
   getBufnr: (denops: Denops) => number | Promise<number>;
@@ -85,21 +86,62 @@ class Buffer extends VimElement {
   
   containing = (content: string | RegExp): BufferInterface => new Buffer(
     this.denocy,
+    async (denops) => await findBuffer(denops, content),
+  );
+}
+
+async function findBuffer(denops: Denops, content: string | RegExp) {
+  const list = await vim.getbufinfo(denops);
+  ensureArray(list);
+
+  for (const buf of list) {
+    ensureLike({ bufnr: 0 }, buf);
+
+    const lines = await vim.getbufline(denops, buf.bufnr, 1, "$");
+
+    if (lines.some(line => line.match(content))) {
+      return buf.bufnr;
+    }
+  }
+
+  return 0;
+}
+
+type WindowInterface = VimElementInterface<Window>;
+
+class Window extends VimElement {
+  getWinnr: (denops: Denops) => number | Promise<number>;
+
+  constructor(denocy: DenocyContext, getWinnr: (denops: Denops) => number | Promise<number>);
+  constructor(denocy: DenocyContext);
+
+  constructor(denocy: DenocyContext, getWinnr?: (denops: Denops) => number | Promise<number>) {
+    super(denocy);
+
+    if (getWinnr) {
+      this.getWinnr = getWinnr;
+    }
+    else {
+      this.getWinnr = async (denops) => await vim.winnr(denops) as number;
+    }
+  }
+
+  getBufnr = async (denops: Denops) => {
+    const winnr = await this.getWinnr(denops)
+    await vim.winbufnr(denops, winnr) as number;
+  };
+
+  verbs = {
+    exist: () => (denops: Denops) => this.getWinnr(denops),
+  };
+
+  should = this.assertionConstructor<keyof typeof this.verbs>()
+
+  containing = (content: string | RegExp): WindowInterface => new Window(
+    this.denocy,
     async (denops) => {
-      const list = await vim.getbufinfo(denops);
-      ensureArray(list);
-
-      for (const buf of list) {
-        ensureLike({ bufnr: 0 }, buf);
-
-        const lines = await vim.getbufline(denops, buf.bufnr, 1, "$");
-
-        if (lines.some(line => line.match(content))) {
-          return buf.bufnr;
-        }
-      }
-
-      return 0;
+      const bufnr = await findBuffer(denops, content);
+      return bufnr ? vim.bufwinnr(denops, bufnr) : 0;
     },
   );
 }

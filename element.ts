@@ -3,12 +3,12 @@ import type { Denops } from "https://deno.land/x/denops_std@v3.3.1/mod.ts";
 import { DenocyContext, DenopsFunction } from "./denocy.ts";
 
 export abstract class DenocyObject {
-  abstract verbs: AssertionVerbDefinition;
+  protected abstract verbs: AssertionVerbDefinition;
   abstract should: AbstractAssertionInterface;
 
   abstract register(fn: DenopsFunction): void;
 
-  assertionConstructor<T extends AssertionVerb>() {
+  protected assertionConstructor<T extends AssertionVerb>() {
     const transiveEntries = Object.entries(this.verbs);
 
     const constructAssertionVerb = (assertFunction: typeof assert) => {
@@ -30,7 +30,7 @@ export abstract class DenocyObject {
   }
 }
 
-export abstract class VimElement extends DenocyObject {
+export abstract class VimElement extends DenocyObject implements VimElementInterface<VimElement> {
   denocy: DenocyContext;
 
   constructor(denocy: DenocyContext) {
@@ -42,6 +42,13 @@ export abstract class VimElement extends DenocyObject {
     this.denocy.fns.push(fn);
     return;
   }
+
+  abstract containing: (content: string | RegExp) => VimElementInterface<VimElement>;
+}
+
+export interface VimElementInterface<E extends VimElement> {
+  should: E["should"];
+  containing: E["containing"];
 }
 
 type AssertionVerbArgs = {
