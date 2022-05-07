@@ -141,7 +141,7 @@ class Window extends VimElement {
     this.denocy,
     async (denops) => {
       const bufnr = await findBuffer(denops, content);
-      return bufnr ? vim.bufwinnr(denops, bufnr) : 0;
+      return vim.bufwinnr(denops, bufnr);
     },
   );
 }

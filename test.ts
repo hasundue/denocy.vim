@@ -55,4 +55,7 @@ test("onlyInclude", (vim) => {
 
 test("Window", (vim) => {
   vim.window.should.exist();
+  vim.window.containing("denocy.vim").should.not.exist();
+  vim.edit("./README.md");
+  vim.window.containing("denocy.vim").should.exist();
 });
