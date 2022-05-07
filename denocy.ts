@@ -132,7 +132,7 @@ class Window extends VimElement {
   };
 
   verbs = {
-    exist: () => (denops: Denops) => this.getWinnr(denops),
+    exist: () => async (denops: Denops) => await this.getWinnr(denops) > -1,
   };
 
   should = this.assertionConstructor<keyof typeof this.verbs>()
