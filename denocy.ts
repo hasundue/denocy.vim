@@ -6,6 +6,7 @@ import { DenocyObject, VimElement, VimElementInterface } from "./element.ts";
 export type Denocy = {
   buffer: BufferInterface;
   window: WindowInterface;
+  popup: PopupInterface;
 } & Omit<DenocyContext, "fns" | "register" | "window" | "buffer">;
 
 export class DenocyContext extends DenocyObject implements Denocy {
@@ -17,6 +18,7 @@ export class DenocyContext extends DenocyObject implements Denocy {
 
   window = new Window(this);
   buffer = new Buffer(this);
+  popup = new Popup(this);
 
   protected verbs = {
     exist: () => async (denops: Denops) => await denops.eval("1"),
@@ -117,18 +119,17 @@ class Window extends VimElement {
 
   constructor(denocy: DenocyContext, getWinnr?: (denops: Denops) => number | Promise<number>) {
     super(denocy);
-
-    if (getWinnr) {
-      this.getWinnr = getWinnr;
-    }
-    else {
-      this.getWinnr = (denops) => vim.winnr(denops) as Promise<number>;
-    }
+    this.getWinnr = getWinnr ?? (denops => vim.winnr(denops) as Promise<number>);
   }
 
   getBufnr = async (denops: Denops) => {
     const winnr = await this.getWinnr(denops)
     return await vim.winbufnr(denops, winnr) as number;
+  };
+
+  getWinid = async (denops: Denops) => {
+    const bufnr = await this.getBufnr(denops);
+    return vim.bufwinid(denops, bufnr);
   };
 
   verbs = {
@@ -144,4 +145,23 @@ class Window extends VimElement {
       return vim.bufwinnr(denops, bufnr);
     },
   );
+}
+
+type PopupInterface = VimElementInterface<Popup>;
+
+class Popup extends Window {
+  constructor(denocy: DenocyContext) {
+    super(denocy, async (denops) => {
+      const list = await vim.getwininfo(denops);
+      assertArray(list);
+
+      for (const info of list) {
+        assertLike({ winnr: 0 }, info);
+        if (info.winnr === 0) {
+          return 0;
+        }
+      }
+      return -1;
+    })
+  }
 }

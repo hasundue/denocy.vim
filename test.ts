@@ -1,4 +1,5 @@
 import { test } from "./mod.ts";
+import * as DenopsPopup from "./denops-popup/mod.ts";
 
 test("test interface", (vim) => {
   vim.should.exist();
@@ -58,4 +59,8 @@ test("Window", (vim) => {
   vim.window.containing("denocy.vim").should.not.exist();
   vim.edit("./README.md");
   vim.window.containing("denocy.vim").should.exist();
+});
+
+test("Popup", { target: "all" }, (vim) => {
+  vim.popup.should.not.exist();
 });
