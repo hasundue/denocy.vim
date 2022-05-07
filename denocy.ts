@@ -1,4 +1,4 @@
-import { ensureLike, ensureArray } from "https://deno.land/x/unknownutil@v1.1.4/mod.ts";
+import { assertLike, assertArray } from "https://deno.land/x/unknownutil@v2.0.0/mod.ts";
 import type { Denops } from "https://deno.land/x/denops_std@v3.3.1/mod.ts";
 import * as vim from "https://deno.land/x/denops_std@v3.3.1/function/mod.ts";
 import { DenocyObject, VimElement, VimElementInterface } from "./element.ts";
@@ -92,10 +92,10 @@ class Buffer extends VimElement {
 
 async function findBuffer(denops: Denops, content: string | RegExp) {
   const list = await vim.getbufinfo(denops);
-  ensureArray(list);
+  assertArray(list);
 
   for (const buf of list) {
-    ensureLike({ bufnr: 0 }, buf);
+    assertLike({ bufnr: 0 }, buf);
 
     const lines = await vim.getbufline(denops, buf.bufnr, 1, "$");
 
@@ -122,13 +122,13 @@ class Window extends VimElement {
       this.getWinnr = getWinnr;
     }
     else {
-      this.getWinnr = async (denops) => await vim.winnr(denops) as number;
+      this.getWinnr = (denops) => vim.winnr(denops) as Promise<number>;
     }
   }
 
   getBufnr = async (denops: Denops) => {
     const winnr = await this.getWinnr(denops)
-    await vim.winbufnr(denops, winnr) as number;
+    return await vim.winbufnr(denops, winnr) as number;
   };
 
   verbs = {
