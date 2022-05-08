@@ -18,7 +18,7 @@ export type Denocy = {
   buffer: BufferInterface;
   window: WindowInterface;
   popup: WindowInterface;
-} & Omit<DenocyContext, "fns" | "window" | "buffer" | "popup">;
+} & Omit<DenocyContext, "expr" | "verbs" | "fns" | "window" | "buffer" | "popup">;
 
 export class DenocyContext extends DenocyObject implements Denocy {
   expr = "vim";
