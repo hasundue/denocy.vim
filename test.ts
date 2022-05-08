@@ -1,5 +1,5 @@
 import { test } from "./mod.ts";
-import * as popup from "./denops-popup/mod.ts";
+import { popup } from "./deps.ts";
 
 test("test interface", (vim) => {
   vim.should.exist();

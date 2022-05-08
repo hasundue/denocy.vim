@@ -1,7 +1,7 @@
-import { assertLike, assertArray, isNumber } from "https://deno.land/x/unknownutil@v2.0.0/mod.ts";
-import type { Denops } from "https://deno.land/x/denops_std@v3.3.1/mod.ts";
-import * as vim from "https://deno.land/x/denops_std@v3.3.1/function/mod.ts";
-import { isPopupWindow } from "./denops-popup/mod.ts";
+import type { Denops } from "./deps.ts";
+import { assertLike, assertArray, isNumber } from "./deps.ts";
+import { vim, popup } from "./deps.ts";
+
 import { DenocyObject, VimElement, VimElementInterface } from "./element.ts";
 
 export type Denocy = {
@@ -160,7 +160,7 @@ class Popup extends Window {
 
         for (const info of list) {
           assertLike({ winnr: 0, winid: 0 }, info);
-          if (await isPopupWindow(denops, info.winid)) {
+          if (await popup.isPopupWindow(denops, info.winid)) {
             return info.winnr;
           }
         }

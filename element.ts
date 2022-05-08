@@ -1,5 +1,6 @@
-import { assert } from "https://deno.land/std@0.137.0/testing/asserts.ts";
-import type { Denops } from "https://deno.land/x/denops_std@v3.3.1/mod.ts";
+import type { Denops } from "./deps.ts";
+import { assert } from "./deps.ts";
+
 import { DenocyContext, DenopsFunction } from "./denocy.ts";
 
 export abstract class DenocyObject {

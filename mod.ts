@@ -1,6 +1,8 @@
-import type { Denops } from "https://deno.land/x/denops_std@v3.3.1/mod.ts";
+import type { Denops } from "./deps.ts";
 
-import "./env.ts"; // set environment variables
+import "./env.ts";
+// We have to import denops_std dynamically because it should be done after environment
+// variables are set by env.ts
 const Denops = await import("https://deno.land/x/denops_std@v3.3.1/test/mod.ts");
 
 import { Denocy, DenocyContext } from "./denocy.ts";
