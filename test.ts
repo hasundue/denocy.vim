@@ -81,3 +81,13 @@ test("call", (vim) => {
   vim.call("setbufline", "", 1, "denocy.vim");
   vim.buffer.should.onlyInclude("denocy.vim");
 });
+
+test("batch", (vim) => {
+  vim.buffer.should.beEmpty();
+  vim.batch(
+    ["setbufline", "", 1, "denocy.vim"],
+    ["setbufline", "", 2, "it's great"],
+  );
+  vim.buffer.should.not.beEmpty();
+  vim.buffer.should.not.onlyInclude("denocy.vim");
+});

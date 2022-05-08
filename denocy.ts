@@ -32,21 +32,25 @@ export class DenocyContext extends DenocyObject implements Denocy {
 
   should: Assertion.Interface<keyof typeof this.verbs> = Assertion.constructInterface(this);
 
-  edit = (filePath: string): void => this.register(
+  edit = (filePath: string) => this.register(
     (denops) => denops.cmd(`edit ${filePath}`)
   );
 
-  echo = (str: string): void => this.register(denops => {
+  echo = (str: string) => this.register(denops => {
     const result = denops.eval(str);
     console.log(result);
   });
 
-  cmd = (str: string): void => this.register(
+  cmd = (str: string) => this.register(
     denops => denops.cmd(str)
   );
 
-  call = (...args: Parameters<Denops["call"]>): void => this.register(
+  call = (...args: Parameters<Denops["call"]>) => this.register(
     denops => denops.call(...args)
+  );
+
+  batch = (...args: Parameters<Denops["batch"]>) => this.register(
+    denops => denops.batch(...args)
   );
 }
 
