@@ -75,3 +75,9 @@ test("cmd", (vim) => {
   vim.cmd("call setbufline('', 1, 'denocy.vim')");
   vim.buffer.should.onlyInclude("denocy.vim");
 });
+
+test("call", (vim) => {
+  vim.buffer.should.beEmpty();
+  vim.call("setbufline", "", 1, "denocy.vim");
+  vim.buffer.should.onlyInclude("denocy.vim");
+});

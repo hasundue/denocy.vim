@@ -12,7 +12,7 @@ export abstract class DenocyObject {
   abstract register(fn: DenopsFunction): void;
 }
 
-type DenopsFunction = (denops: Denops) => void | Promise<void>
+type DenopsFunction = (denops: Denops) => unknown;
 
 export class DenocyContext extends DenocyObject implements Denocy {
   expr = "vim";
@@ -36,15 +36,17 @@ export class DenocyContext extends DenocyObject implements Denocy {
     (denops) => denops.cmd(`edit ${filePath}`)
   );
 
-  echo = (str: string): void => this.register(
-    (denops) => {
-      const result = denops.eval(str);
-      console.log(result);
-    }
-  );
+  echo = (str: string): void => this.register(denops => {
+    const result = denops.eval(str);
+    console.log(result);
+  });
 
   cmd = (str: string): void => this.register(
-    (denops) => denops.cmd(str)
+    denops => denops.cmd(str)
+  );
+
+  call = (...args: Parameters<Denops["call"]>): void => this.register(
+    denops => denops.call(...args)
   );
 }
 
