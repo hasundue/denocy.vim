@@ -1,5 +1,5 @@
 import type { Denops } from "./deps.ts";
-import { assertLike, assertArray, isNumber } from "./deps.ts";
+import { assertLike, assertArray } from "./deps.ts";
 import { vim, popup } from "./deps.ts";
 
 import * as Assertion from "./assertion.ts";
@@ -195,24 +195,9 @@ type WindowInterface = VimElementInterface<Window>;
 class Popup extends Window {
   constructor(denocy: DenocyContext, expr: string) {
     super(denocy, expr, async (denops) => {
-      if (denops.meta.host === "nvim") {
-        const list = await vim.getwininfo(denops);
-        assertArray(list);
-
-        for (const info of list) {
-          assertLike({ winnr: 0, winid: 0 }, info);
-          if (await popup.isPopupWindow(denops, info.winid)) {
-            return info.winnr;
-          }
-        }
-      }
-      else {
-        const list = await denops.call("popup_list");
-        assertArray(list, isNumber);
-
-        if (list.length) {
-          return list[0];
-        }
+      const list = await popup.list(denops);
+      if (list.length) {
+        return list[0];
       }
       return -1;
     })
