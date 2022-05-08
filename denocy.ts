@@ -1,5 +1,5 @@
 import type { Denops } from "./deps.ts";
-import { assertLike, assertArray } from "./deps.ts";
+import { assertLike, assertArray, ensureNumber } from "./deps.ts";
 import { vim, popup } from "./deps.ts";
 
 import * as Assertion from "./assertion.ts";
@@ -156,12 +156,16 @@ class Window extends VimElement {
     getWinnr?: (denops: Denops) => number | Promise<number>
   ) {
     super(denocy, expr);
-    this.getWinnr = getWinnr ?? (denops => vim.winnr(denops) as Promise<number>);
+    this.getWinnr = getWinnr ?? (async denops => {
+      const winnr = await vim.winnr(denops);
+      return ensureNumber(winnr);
+    });
   }
 
   getBufnr = async (denops: Denops) => {
     const winnr = await this.getWinnr(denops)
-    return await vim.winbufnr(denops, winnr) as number;
+    const bufnr = await vim.winbufnr(denops, winnr);
+    return ensureNumber(bufnr);
   };
 
   getWinid = async (denops: Denops) => {
