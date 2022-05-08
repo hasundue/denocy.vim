@@ -1,5 +1,5 @@
 // Deno standard libraries
-export { assert } from "https://deno.land/std@0.137.0/testing/asserts.ts";
+export { assert, AssertionError } from "https://deno.land/std@0.137.0/testing/asserts.ts";
 
 // Denops standard module
 export type { Denops } from "https://deno.land/x/denops_std@v3.3.1/mod.ts";
