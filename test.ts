@@ -61,7 +61,7 @@ test("Window", (vim) => {
   vim.window.containing("denocy.vim").should.exist();
 });
 
-test("Popup", { target: "all" }, (vim) => {
+test("Popup empty", { target: "all" }, (vim) => {
   vim.popup.should.not.exist();
   vim.register(async denops => {
     await popup.open(denops, 1, {
@@ -72,4 +72,24 @@ test("Popup", { target: "all" }, (vim) => {
     });
   });
   vim.popup.should.exist();
+  vim.popup.should.beEmpty();
+  vim.popup.should.not.include("denocy.vim");
+  vim.popup.containing("denocy.vim").should.not.exist();
+});
+
+test("Popup not empty", { target: "all" }, (vim) => {
+  vim.popup.should.not.exist();
+  vim.edit("README.md");
+  vim.register(async denops => {
+    await popup.open(denops, 1, {
+      row: 1,
+      col: 1,
+      width: 1,
+      height: 1,
+    });
+  });
+  vim.popup.should.exist();
+  vim.popup.should.not.beEmpty();
+  vim.popup.should.include("denocy.vim");
+  vim.popup.containing("denocy.vim").should.exist();
 });

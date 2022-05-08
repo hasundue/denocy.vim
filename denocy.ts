@@ -135,6 +135,9 @@ class Window extends VimElement {
 
   verbs = {
     exist: () => async (denops: Denops) => await this.getWinnr(denops) > -1,
+    beEmpty: new Buffer(this.denocy, this.getBufnr).verbs.beEmpty,
+    include: new Buffer(this.denocy, this.getBufnr).verbs.include,
+    onlyInclude: new Buffer(this.denocy, this.getBufnr).verbs.onlyInclude,
   };
 
   should = this.assertionConstructor<keyof typeof this.verbs>()
