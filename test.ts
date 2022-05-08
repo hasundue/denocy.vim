@@ -1,5 +1,5 @@
 import { test } from "./mod.ts";
-import { popup } from "./deps.ts";
+import { popup, assertLike, assertEquals } from "./deps.ts";
 
 test("test interface", (vim) => {
   vim.should.exist();
@@ -90,4 +90,15 @@ test("batch", (vim) => {
   );
   vim.buffer.should.not.beEmpty();
   vim.buffer.should.not.onlyInclude("denocy.vim");
+});
+
+test("moveTo", (vim) => {
+  vim.edit("README.md");
+  vim.moveTo("denocy.vim");
+  vim.register(async denops => {
+    const pos = await denops.call("getpos", ".");
+    assertLike([0, 0, 0, 0], pos);
+    assertEquals(pos[1], 1);
+    assertEquals(pos[2], 3);
+  });
 });

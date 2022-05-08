@@ -10,6 +10,8 @@ export abstract class DenocyObject {
   abstract should: Assertion.AbstractInterface;
 
   abstract register(fn: DenopsFunction): void;
+
+  abstract moveTo: (content: string | RegExp) => void;
 }
 
 type DenopsFunction = (denops: Denops) => unknown;
@@ -36,8 +38,8 @@ export class DenocyContext extends DenocyObject implements Denocy {
     (denops) => denops.cmd(`edit ${filePath}`)
   );
 
-  echo = (str: string) => this.register(denops => {
-    const result = denops.eval(str);
+  echo = (str: string) => this.register(async denops => {
+    const result = await denops.eval(str);
     console.log(result);
   });
 
@@ -52,6 +54,8 @@ export class DenocyContext extends DenocyObject implements Denocy {
   batch = (...args: Parameters<Denops["batch"]>) => this.register(
     denops => denops.batch(...args)
   );
+
+  moveTo = this.buffer.moveTo;
 }
 
 export type Denocy = {
@@ -81,6 +85,7 @@ abstract class VimElement extends DenocyObject {
 interface VimElementInterface<E extends VimElement> {
   should: E["should"];
   containing: E["containing"];
+  moveTo: E["moveTo"];
 }
 
 class Buffer extends VimElement {
@@ -133,6 +138,16 @@ class Buffer extends VimElement {
     `buffer containing ${content}`,
     (denops) => findBuffer(denops, content),
   );
+
+  moveTo = (content: string | RegExp) => this.register(async (denops: Denops) => {
+    const pos = await vim.searchpos(denops, content);
+    assertLike([0, 0], pos);
+
+    if (pos !== [0, 0]) {
+      const bufnr = await this.getBufnr(denops);
+      await vim.setpos(denops, ".", [bufnr, pos[0], pos[1], 0]);
+    }
+  });
 }
 
 type BufferInterface = VimElementInterface<Buffer>;
@@ -183,11 +198,13 @@ class Window extends VimElement {
     return vim.bufwinid(denops, bufnr);
   };
 
+  private getBuf = new Buffer(this.denocy, this.expr, this.getBufnr);
+
   verbs = {
     exist: () => async (denops: Denops) => await this.getWinnr(denops) > -1,
-    beEmpty: new Buffer(this.denocy, this.expr, this.getBufnr).verbs.beEmpty,
-    include: new Buffer(this.denocy, this.expr, this.getBufnr).verbs.include,
-    onlyInclude: new Buffer(this.denocy, this.expr, this.getBufnr).verbs.onlyInclude,
+    beEmpty: this.getBuf.verbs.beEmpty,
+    include: this.getBuf.verbs.include,
+    onlyInclude: this.getBuf.verbs.onlyInclude,
   };
 
   should: Assertion.Interface<keyof typeof this.verbs> = Assertion.constructInterface(this);
@@ -200,6 +217,8 @@ class Window extends VimElement {
       return vim.bufwinnr(denops, bufnr);
     },
   );
+
+  moveTo = this.getBuf.moveTo;
 }
 
 type WindowInterface = VimElementInterface<Window>;
@@ -212,6 +231,6 @@ class Popup extends Window {
         return list[0];
       }
       return -1;
-    })
+    });
   }
 }
