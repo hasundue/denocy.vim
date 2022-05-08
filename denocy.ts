@@ -7,7 +7,7 @@ import { DenocyObject, VimElement, VimElementInterface } from "./element.ts";
 export type Denocy = {
   buffer: BufferInterface;
   window: WindowInterface;
-  popup: PopupInterface;
+  popup: WindowInterface;
 } & Omit<DenocyContext, "fns" | "window" | "buffer" | "popup">;
 
 export class DenocyContext extends DenocyObject implements Denocy {
@@ -150,8 +150,6 @@ class Window extends VimElement {
     },
   );
 }
-
-type PopupInterface = VimElementInterface<Popup>;
 
 class Popup extends Window {
   constructor(denocy: DenocyContext) {
