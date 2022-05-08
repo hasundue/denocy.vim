@@ -1,5 +1,5 @@
 import { test } from "./mod.ts";
-import * as DenopsPopup from "./denops-popup/mod.ts";
+import * as popup from "./denops-popup/mod.ts";
 
 test("test interface", (vim) => {
   vim.should.exist();
@@ -63,4 +63,13 @@ test("Window", (vim) => {
 
 test("Popup", { target: "all" }, (vim) => {
   vim.popup.should.not.exist();
+  vim.register(async denops => {
+    await popup.open(denops, 1, {
+      row: 1,
+      col: 1,
+      width: 1,
+      height: 1,
+    });
+  });
+  vim.popup.should.exist();
 });

@@ -1,13 +1,14 @@
-import { assertLike, assertArray } from "https://deno.land/x/unknownutil@v2.0.0/mod.ts";
+import { assertLike, assertArray, isNumber } from "https://deno.land/x/unknownutil@v2.0.0/mod.ts";
 import type { Denops } from "https://deno.land/x/denops_std@v3.3.1/mod.ts";
 import * as vim from "https://deno.land/x/denops_std@v3.3.1/function/mod.ts";
+import { isPopupWindow } from "./denops-popup/mod.ts";
 import { DenocyObject, VimElement, VimElementInterface } from "./element.ts";
 
 export type Denocy = {
   buffer: BufferInterface;
   window: WindowInterface;
   popup: PopupInterface;
-} & Omit<DenocyContext, "fns" | "register" | "window" | "buffer">;
+} & Omit<DenocyContext, "fns" | "window" | "buffer" | "popup">;
 
 export class DenocyContext extends DenocyObject implements Denocy {
   fns: DenopsFunction[] = [];
@@ -152,13 +153,23 @@ type PopupInterface = VimElementInterface<Popup>;
 class Popup extends Window {
   constructor(denocy: DenocyContext) {
     super(denocy, async (denops) => {
-      const list = await vim.getwininfo(denops);
-      assertArray(list);
+      if (denops.meta.host === "nvim") {
+        const list = await vim.getwininfo(denops);
+        assertArray(list);
 
-      for (const info of list) {
-        assertLike({ winnr: 0 }, info);
-        if (info.winnr === 0) {
-          return 0;
+        for (const info of list) {
+          assertLike({ winnr: 0, winid: 0 }, info);
+          if (await isPopupWindow(denops, info.winid)) {
+            return info.winnr;
+          }
+        }
+      }
+      else {
+        const list = await denops.call("popup_list");
+        assertArray(list, isNumber);
+
+        if (list.length) {
+          return list[0];
         }
       }
       return -1;
