@@ -38,7 +38,7 @@ if (!homePath) {
   throw new Error("Environment variable HOME is not defined");
 }
 
-const denocyDir = join(homePath, ".cache/denocy");
+const denocyDir = Deno.env.get("DENOCY_DIR") ?? join(homePath, ".cache/denocy");
 ensureDirSync(denocyDir);
 
 const dirEntries = Array.from(Deno.readDirSync(denocyDir));
