@@ -29,9 +29,12 @@ export function constructInterface(obj: DenocyObject) {
       key,
       (...args: Parameters<typeof fn>) => { 
         const anyArg = args as [arg: any]; // use any for cheating deno compiler
-        return obj.register(
-          async (denops: Denops) => assertFunction(obj, key as Verb, await fn(...anyArg)(denops))
-        )
+        return obj.register(async (denops: Denops) => assertFunction(
+          obj,
+          key as Verb,
+          args,
+          await fn(...anyArg)(denops)
+        ));
       },
     ])))
   };
@@ -42,23 +45,30 @@ export function constructInterface(obj: DenocyObject) {
   } as Interface<keyof typeof obj.verbs>;
 }
 
-function assertTruthy(obj: DenocyObject, verb: Verb, boolLike: unknown) {
-  return assertInternal(obj, verb, "", boolLike);
+function assertTruthy(obj: DenocyObject, verb: Verb, args: unknown[], boolLike: unknown) {
+  return assertInternal(obj, verb, "", args, boolLike);
 }
 
-function assertFalsy(obj: DenocyObject, verb: Verb, boolLike: unknown) {
-  return assertInternal(obj, verb, "not ", !boolLike);
+function assertFalsy(obj: DenocyObject, verb: Verb, args: unknown[], boolLike: unknown) {
+  return assertInternal(obj, verb, "not ", args, !boolLike);
 }
 
-function assertInternal(obj: DenocyObject, verb: Verb, not: "not " | "", boolLike: unknown) {
+function assertInternal(
+  obj: DenocyObject,
+  verb: Verb,
+  not: "not " | "",
+  args: unknown[],
+  boolLike: unknown
+) {
   try {
     assert(boolLike);
   }
   catch {
     const wasOrDid = exprs[verb].includes("be ") ? "was" : "did";
     const lastNot = not ? "" : " not";
+    const object = args.length ? ` "${args[0]}"` : "";
     throw new AssertionError(
-      `${obj.expr} had ${not}been expected to ${exprs[verb]}, but it ${wasOrDid}${lastNot}.`
+      `${obj.expr} had ${not}been expected to ${exprs[verb]}${object}, but it ${wasOrDid}${lastNot}.`
     );
   }
 }
