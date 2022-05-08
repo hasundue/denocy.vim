@@ -14,12 +14,6 @@ export abstract class DenocyObject {
 
 type DenopsFunction = (denops: Denops) => void | Promise<void>
 
-export type Denocy = {
-  buffer: BufferInterface;
-  window: WindowInterface;
-  popup: WindowInterface;
-} & Omit<DenocyContext, "expr" | "verbs" | "fns" | "window" | "buffer" | "popup">;
-
 export class DenocyContext extends DenocyObject implements Denocy {
   expr = "vim";
   fns: DenopsFunction[] = [];
@@ -33,24 +27,28 @@ export class DenocyContext extends DenocyObject implements Denocy {
   popup = new Popup(this, "popup");
 
   verbs = {
-    exist: () => async (denops: Denops) => await denops.eval("1"),
+    exist: () => (denops: Denops) => denops.eval("1"),
   };
 
   should: Assertion.Interface<keyof typeof this.verbs> = Assertion.constructInterface(this);
 
   edit = (filePath: string): void => this.register(
-    async (denops) => await denops.cmd(`edit ${filePath}`)
+    (denops) => denops.cmd(`edit ${filePath}`)
   );
 
   echo = (str: string): void => this.register(
-    async (denops) => {
-      const result = await denops.eval(`${str}`);
+    (denops) => {
+      const result = denops.eval(`${str}`);
       console.log(result);
     }
   );
-
-  // source: (filePath: string) => void;
 }
+
+export type Denocy = {
+  buffer: BufferInterface;
+  window: WindowInterface;
+  popup: WindowInterface;
+} & Omit<DenocyContext, "expr" | "verbs" | "fns" | "window" | "buffer" | "popup">;
 
 abstract class VimElement extends DenocyObject {
   denocy: DenocyContext;
@@ -92,7 +90,7 @@ class Buffer extends VimElement {
       this.getBufnr = getBufnr;
     }
     else {
-      this.getBufnr = async (denops) => await vim.bufnr(denops);
+      this.getBufnr = (denops) => vim.bufnr(denops);
     }
   }
 
@@ -123,7 +121,7 @@ class Buffer extends VimElement {
   containing = (content: string | RegExp): BufferInterface => new Buffer(
     this.denocy,
     `buffer containing ${content}`,
-    async (denops) => await findBuffer(denops, content),
+    (denops) => findBuffer(denops, content),
   );
 }
 
