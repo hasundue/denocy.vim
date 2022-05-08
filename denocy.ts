@@ -5,6 +5,7 @@ import { vim, popup } from "./deps.ts";
 import * as Assertion from "./assertion.ts";
 
 export abstract class DenocyObject {
+  abstract expr: string;
   abstract verbs: Assertion.Impl;
   abstract should: Assertion.AbstractInterface;
 
@@ -20,19 +21,19 @@ export type Denocy = {
 } & Omit<DenocyContext, "fns" | "window" | "buffer" | "popup">;
 
 export class DenocyContext extends DenocyObject implements Denocy {
+  expr = "vim";
   fns: DenopsFunction[] = [];
 
   register(fn: DenopsFunction) {
     this.fns.push(fn);
   }
 
-  window = new Window(this);
-  buffer = new Buffer(this);
-  popup = new Popup(this);
+  buffer = new Buffer(this, "buffer");
+  window = new Window(this, "window");
+  popup = new Popup(this, "popup");
 
   verbs = {
     exist: () => async (denops: Denops) => await denops.eval("1"),
-    beNeovim: () => async (denops: Denops) => await denops.eval("has('nvim')"),
   };
 
   should: Assertion.Interface<keyof typeof this.verbs> = Assertion.constructInterface(this);
@@ -53,10 +54,12 @@ export class DenocyContext extends DenocyObject implements Denocy {
 
 abstract class VimElement extends DenocyObject {
   denocy: DenocyContext;
+  expr: string;
 
-  constructor(denocy: DenocyContext) {
+  constructor(denocy: DenocyContext, expr: string) {
     super();
     this.denocy = denocy;
+    this.expr = expr;
   }
 
   register(fn: DenopsFunction) {
@@ -75,11 +78,15 @@ interface VimElementInterface<E extends VimElement> {
 class Buffer extends VimElement {
   getBufnr: (denops: Denops) => number | Promise<number>;
 
-  constructor(denocy: DenocyContext, getBufnr: (denops: Denops) => number | Promise<number>);
-  constructor(denocy: DenocyContext);
+  constructor(denocy: DenocyContext, expr: string);
+  constructor(denocy: DenocyContext, expr: string, getBufnr: (denops: Denops) => number | Promise<number>);
 
-  constructor(denocy: DenocyContext, getBufnr?: (denops: Denops) => number | Promise<number>) {
-    super(denocy);
+  constructor(
+    denocy: DenocyContext,
+    expr: string,
+    getBufnr?: (denops: Denops) => number | Promise<number>
+  ) {
+    super(denocy, expr);
 
     if (getBufnr) {
       this.getBufnr = getBufnr;
@@ -115,6 +122,7 @@ class Buffer extends VimElement {
   
   containing = (content: string | RegExp): BufferInterface => new Buffer(
     this.denocy,
+    `buffer containing ${content}`,
     async (denops) => await findBuffer(denops, content),
   );
 }
@@ -141,11 +149,15 @@ async function findBuffer(denops: Denops, content: string | RegExp) {
 class Window extends VimElement {
   getWinnr: (denops: Denops) => number | Promise<number>;
 
-  constructor(denocy: DenocyContext, getWinnr: (denops: Denops) => number | Promise<number>);
-  constructor(denocy: DenocyContext);
+  constructor(denocy: DenocyContext, expr: string);
+  constructor(denocy: DenocyContext, expr: string, getWinnr: (denops: Denops) => number | Promise<number>);
 
-  constructor(denocy: DenocyContext, getWinnr?: (denops: Denops) => number | Promise<number>) {
-    super(denocy);
+  constructor(
+    denocy: DenocyContext,
+    expr: string,
+    getWinnr?: (denops: Denops) => number | Promise<number>
+  ) {
+    super(denocy, expr);
     this.getWinnr = getWinnr ?? (denops => vim.winnr(denops) as Promise<number>);
   }
 
@@ -161,15 +173,16 @@ class Window extends VimElement {
 
   verbs = {
     exist: () => async (denops: Denops) => await this.getWinnr(denops) > -1,
-    beEmpty: new Buffer(this.denocy, this.getBufnr).verbs.beEmpty,
-    include: new Buffer(this.denocy, this.getBufnr).verbs.include,
-    onlyInclude: new Buffer(this.denocy, this.getBufnr).verbs.onlyInclude,
+    beEmpty: new Buffer(this.denocy, this.expr, this.getBufnr).verbs.beEmpty,
+    include: new Buffer(this.denocy, this.expr, this.getBufnr).verbs.include,
+    onlyInclude: new Buffer(this.denocy, this.expr, this.getBufnr).verbs.onlyInclude,
   };
 
   should: Assertion.Interface<keyof typeof this.verbs> = Assertion.constructInterface(this);
 
   containing = (content: string | RegExp): WindowInterface => new Window(
     this.denocy,
+    `window containing ${content}`,
     async (denops) => {
       const bufnr = await findBuffer(denops, content);
       return vim.bufwinnr(denops, bufnr);
@@ -180,8 +193,8 @@ class Window extends VimElement {
 type WindowInterface = VimElementInterface<Window>;
 
 class Popup extends Window {
-  constructor(denocy: DenocyContext) {
-    super(denocy, async (denops) => {
+  constructor(denocy: DenocyContext, expr: string) {
+    super(denocy, expr, async (denops) => {
       if (denops.meta.host === "nvim") {
         const list = await vim.getwininfo(denops);
         assertArray(list);

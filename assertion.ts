@@ -3,7 +3,7 @@ import { assert, AssertionError } from "./deps.ts";
 
 import { DenocyObject } from "./denocy.ts";
 
-export type Args = {
+type Args = {
   exist: [];
   beNeovim: [];
   beEmpty: [];
@@ -11,26 +11,26 @@ export type Args = {
   onlyInclude: [content: string];
 };
 
-export type Verb = keyof Args;
+type Verb = keyof Args;
 
-export const messages: Record<Verb, string> = {
-  exist: "",
-  beNeovim: "",
-  beEmpty: "",
-  include: "",
-  onlyInclude: "",
+const exprs: Record<Verb, string> = {
+  exist: "exist",
+  beNeovim: "be Neovim",
+  beEmpty: "be empty",
+  include: "include",
+  onlyInclude: "only include",
 }
 
 export function constructInterface(obj: DenocyObject) {
   const entries = Object.entries(obj.verbs);
 
-  const constructAssertionVerb = (assertFunction: typeof assertInternal) => {
+  const constructAssertionVerb = (assertFunction: typeof assertTruthy) => {
     return Object.fromEntries(entries.map(([key, fn]) => ([
       key,
       (...args: Parameters<typeof fn>) => { 
         const anyArg = args as [arg: any]; // use any for cheating deno compiler
         return obj.register(
-          async (denops: Denops) => assertFunction(await fn(...anyArg)(denops))
+          async (denops: Denops) => assertFunction(obj, key as Verb, await fn(...anyArg)(denops))
         )
       },
     ])))
@@ -39,23 +39,27 @@ export function constructInterface(obj: DenocyObject) {
   return {
     ...constructAssertionVerb(assertTruthy),
     not: constructAssertionVerb(assertFalsy)
-  } as unknown as Interface<keyof typeof obj.verbs>;
+  } as Interface<keyof typeof obj.verbs>;
 }
 
-export function assertTruthy(boolLike: unknown) {
-  return assertInternal(boolLike);
+function assertTruthy(obj: DenocyObject, verb: Verb, boolLike: unknown) {
+  return assertInternal(obj, verb, "", boolLike);
 }
 
-export function assertFalsy(boolLike: unknown) {
-  return assertInternal(!boolLike);
+function assertFalsy(obj: DenocyObject, verb: Verb, boolLike: unknown) {
+  return assertInternal(obj, verb, "not ", !boolLike);
 }
 
-function assertInternal(boolLike: unknown) {
+function assertInternal(obj: DenocyObject, verb: Verb, not: "not " | "", boolLike: unknown) {
   try {
     assert(boolLike);
   }
   catch {
-    throw new AssertionError("hoge");
+    const wasOrDid = exprs[verb].includes("be ") ? "was" : "did";
+    const lastNot = not ? "" : " not";
+    throw new AssertionError(
+      `${obj.expr} had ${not}been expected to ${exprs[verb]}, but it ${wasOrDid}${lastNot}.`
+    );
   }
 }
 
@@ -64,7 +68,7 @@ export type Impl = {
     (...args: Args[key]) => (denops: Denops) => unknown | Promise<unknown>;
 };
 
-export type VerbInterface<T extends Verb> = {
+type VerbInterface<T extends Verb> = {
   [key in T]: (...args: Args[key]) => void;
 };
 

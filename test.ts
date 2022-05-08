@@ -17,14 +17,6 @@ test({
   },
 });
 
-test("Denocy (nvim)", { target: "nvim" }, (nvim) => {
-  nvim.should.beNeovim();
-});
-
-test("Denocy (vim)", { target: "vim" }, (vim) => {
-  vim.should.not.beNeovim();
-});
-
 test("Buffer", (vim) => {
   vim.buffer.should.exist();
   vim.buffer.should.beEmpty();
