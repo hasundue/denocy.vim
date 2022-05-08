@@ -69,3 +69,9 @@ test("Popup", { target: "all" }, (vim) => {
   vim.popup.should.include("denocy.vim");
   vim.popup.containing("denocy.vim").should.exist();
 });
+
+test("cmd", (vim) => {
+  vim.buffer.should.beEmpty();
+  vim.cmd("call setbufline('', 1, 'denocy.vim')");
+  vim.buffer.should.onlyInclude("denocy.vim");
+});

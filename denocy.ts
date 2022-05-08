@@ -38,9 +38,13 @@ export class DenocyContext extends DenocyObject implements Denocy {
 
   echo = (str: string): void => this.register(
     (denops) => {
-      const result = denops.eval(`${str}`);
+      const result = denops.eval(str);
       console.log(result);
     }
+  );
+
+  cmd = (str: string): void => this.register(
+    (denops) => denops.cmd(str)
   );
 }
 
