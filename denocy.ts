@@ -115,7 +115,7 @@ class Buffer extends VimElement {
     beEmpty: () => async (denops: Denops) => {
       const bufnr = await this.getBufnr(denops);
       const lines = await vim.getbufline(denops, bufnr, 1, "$");
-      return lines.some(line => !line.length);
+      return !lines.some(line => line.length);
     },
 
     include: (content: string | RegExp) => async (denops: Denops) => {
