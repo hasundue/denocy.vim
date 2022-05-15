@@ -1,6 +1,7 @@
 import type { Denops } from "./deps.ts";
 import { assertLike, assertArray, ensureNumber } from "./deps.ts";
-import { vim, popup } from "./deps.ts";
+import { delay } from "./deps.ts";
+import { vim, autocmd, popup } from "./deps.ts";
 
 import * as Assertion from "./assertion.ts";
 
@@ -42,6 +43,8 @@ export class DenocyContext extends DenocyObject implements Denocy {
     const result = await denops.eval(str);
     console.log(result);
   });
+
+  delay = (ms: number) => this.register(() => delay(ms));
 
   cmd = (str: string) => this.register(
     denops => denops.cmd(str)
@@ -145,7 +148,8 @@ class Buffer extends VimElement {
 
     if (pos !== [0, 0]) {
       const bufnr = await this.getBufnr(denops);
-      await vim.setpos(denops, ".", [bufnr, pos[0], pos[1], 0]);
+      vim.setpos(denops, ".", [bufnr, pos[0], pos[1], 0]);
+      autocmd.emit(denops, "CursorMoved");
     }
   });
 }

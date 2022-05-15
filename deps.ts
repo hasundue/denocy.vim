@@ -1,9 +1,12 @@
 // Deno standard libraries
 export { assert, assertEquals, AssertionError } from "https://deno.land/std@0.137.0/testing/asserts.ts";
+export { delay } from "https://deno.land/std@0.139.0/async/mod.ts";
+
 
 // Denops standard module
 export type { Denops } from "https://deno.land/x/denops_std@v3.3.1/mod.ts";
 export * as vim from "https://deno.land/x/denops_std@v3.3.1/function/mod.ts";
+export * as autocmd from "https://deno.land/x/denops_std@v3.3.1/autocmd/mod.ts";
 
 // Deno third party modules
 export { 
