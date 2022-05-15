@@ -1,4 +1,5 @@
 import type { Denops } from "./deps.ts";
+import { execute } from "./deps.ts";
 
 import "./env.ts";
 // We have to import denops_std dynamically because it should be done after environment
@@ -52,10 +53,26 @@ function runTest(t: TestDefinition) {
     ...t,
     mode: t.target ?? "any",
     fn: async (denops: Denops) => {
+      // replace async functions denops#noitfy() and denops#request_async()
+      // with a sync function denops#request
+      execute(
+        denops,
+        `
+        function! denops#notify(...)
+          return call('denops#request', a:000)
+        endfunction
+
+        function! denops#request_async(...)
+          return call('denops#request', a:000)
+        endfunction
+        `
+      );
+
       if (pluginName) {
         denops.call("denops#plugin#register", pluginName);
         await denops.call("denops#plugin#wait", pluginName);
       }
+
       for (const fn of denocy.fns) {
         await fn(denops);
       }
