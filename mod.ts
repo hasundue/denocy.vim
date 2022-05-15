@@ -56,8 +56,8 @@ function runTest(t: TestDefinition) {
         denops.call("denops#plugin#register", pluginName);
         await denops.call("denops#plugin#wait", pluginName);
       }
-      for (let i = 0; i < denocy.fns.length; i++) {
-        await denocy.fns[i](denops);
+      for (const fn of denocy.fns) {
+        await fn(denops);
       }
     },
     pluginName: "denocy",
