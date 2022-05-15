@@ -1,7 +1,7 @@
 import type { Denops } from "./deps.ts";
 import { assertLike, assertArray, ensureNumber } from "./deps.ts";
 import { delay } from "./deps.ts";
-import { vim, autocmd, popup } from "./deps.ts";
+import { vim, popup } from "./deps.ts";
 
 import * as Assertion from "./assertion.ts";
 
@@ -149,7 +149,6 @@ class Buffer extends VimElement {
     if (pos !== [0, 0]) {
       const bufnr = await this.getBufnr(denops);
       vim.setpos(denops, ".", [bufnr, pos[0], pos[1], 0]);
-      autocmd.emit(denops, "CursorMoved");
     }
   });
 }
