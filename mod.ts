@@ -46,13 +46,21 @@ function runTest(t: TestDefinition) {
   const denocy = new DenocyContext();
   t.fn(denocy); // convert TestFunctions to DenopsFunctions and register them in denocy.fns
 
+  const pluginName = Deno.env.get("DENOCY_PLUGIN_NAME");
+
   Denops.test({
     ...t,
     mode: t.target ?? "any",
     fn: async (denops: Denops) => {
+      if (pluginName) {
+        denops.call("denops#plugin#register", pluginName);
+        await denops.call("denops#plugin#wait", pluginName);
+      }
       for (let i = 0; i < denocy.fns.length; i++) {
         await denocy.fns[i](denops);
       }
     },
+    pluginName: "denocy",
+    prelude: pluginName ? [`set runtimepath^=${Deno.cwd()}`] : undefined,
   });
 }

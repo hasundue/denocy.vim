@@ -31,6 +31,34 @@ for (const cmd of ["vim", "nvim"]) {
 }
 
 //
+// Set DENOCY_PLUGIN_NAME
+//
+const cwd = Deno.cwd();
+const dirEntries = Array.from(Deno.readDirSync(cwd));
+const srcDirEntry = dirEntries.find(
+  entry => entry.isDirectory && entry.name.match(/(autoload)|(lua)|(denops)/)
+);
+
+if (srcDirEntry) {
+  const srcEntries = Array.from(Deno.readDirSync(srcDirEntry.name));
+
+  if (srcDirEntry.name === "denops") {
+    if (srcEntries[0]) {
+      const name = srcEntries[0].name;
+      Deno.env.set("DENOCY_PLUGIN_NAME", name);
+    }
+  }
+  else {
+    const regExp = /.+(?=\.[(vim)|(lua)])/;
+    const srcFileEntry = srcEntries.find(entry => entry.name.match(regExp));
+    if (srcFileEntry) {
+      const match = srcFileEntry.name.match(regExp)![0];
+      Deno.env.set("DENOCY_PLUGIN_NAME", match);
+    }
+  }
+}
+
+//
 // Setup dependencies (denops and denops-popup)
 //
 const homePath = Deno.env.get("HOME");
@@ -41,12 +69,12 @@ if (!homePath) {
 const denocyDir = Deno.env.get("DENOCY_DIR") ?? join(homePath, ".cache/denocy");
 ensureDirSync(denocyDir);
 
-const dirEntries = Array.from(Deno.readDirSync(denocyDir));
+const denocyDirEntries = Array.from(Deno.readDirSync(denocyDir));
 
 // Fetch denops and set DENOPS_PATH if necessary
 if (!Deno.env.get("DENOPS_PATH")) {
   const denopsDir = join(denocyDir, "denops.vim");
-  const denopsDirEntry = dirEntries.find(entry => entry.isDirectory && entry.name === "denops.vim");
+  const denopsDirEntry = denocyDirEntries.find(entry => entry.isDirectory && entry.name === "denops.vim");
 
   if (!denopsDirEntry) {
     const proc = Deno.run({
