@@ -103,12 +103,18 @@ test("moveTo", (vim) => {
   });
 });
 
-test("delay option", { delay: 100 }, (vim) => {
+test("delay option", { delay: 10 }, (vim) => {
   vim.should.exist();
   vim.popup.should.not.exist();
 });
 
-test("timeout option", { delay: 100, timeout: 300 }, (vim) => {
+test("timeout option", { delay: 10, timeout: 100 }, (vim) => {
   vim.should.exist();
   vim.popup.should.not.exist();
+});
+
+test("echo", (vim) => {
+  vim.echo("'test'");
+  vim.edit("deno.json");
+  vim.echo();
 });

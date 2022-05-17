@@ -13,6 +13,8 @@ export abstract class DenocyObject {
   abstract register(fn: DenopsFunction): void;
 
   abstract moveTo: (content: string | RegExp) => void;
+
+  abstract echo: (str?: string) => void;
 }
 
 type DenopsFunction = (denops: Denops) => unknown;
@@ -39,9 +41,14 @@ export class DenocyContext extends DenocyObject implements Denocy {
     denops => denops.cmd(`edit ${filePath}`)
   );
 
-  echo = (str: string) => this.register(async denops => {
-    const result = await denops.eval(str);
-    console.log(result);
+  echo = (str?: string) => this.register(async denops => {
+    if (str) {
+      const result = await denops.eval(str);
+      console.log(result);
+    }
+    else {
+      this.buffer.echo();
+    }
   });
 
   delay = (ms: number) => this.register(() => delay(ms));
@@ -89,6 +96,7 @@ interface VimElementInterface<E extends VimElement> {
   should: E["should"];
   containing: E["containing"];
   moveTo: E["moveTo"];
+  echo: E["echo"];
 }
 
 class Buffer extends VimElement {
@@ -153,6 +161,12 @@ class Buffer extends VimElement {
         await emit(denops, "CursorMoved");
       }
     }
+  });
+
+  echo = () => this.register(async (denops: Denops) => {
+    const bufnr = await this.getBufnr(denops);
+    const lines = await vim.getbufline(denops, bufnr, 1, "$");
+    console.log(lines.join("\n"));
   });
 }
 
@@ -225,6 +239,8 @@ class Window extends VimElement {
   );
 
   moveTo = this.getBuf.moveTo;
+
+  echo = this.getBuf.echo;
 }
 
 type WindowInterface = VimElementInterface<Window>;
