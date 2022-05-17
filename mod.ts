@@ -1,5 +1,6 @@
 import type { Denops } from "./deps.ts";
 import { execute } from "./deps.ts";
+import { delay } from "./deps.ts";
 
 import "./env.ts";
 // We have to import denops_std dynamically because it should be done after environment
@@ -11,6 +12,7 @@ import { Denocy, DenocyContext } from "./denocy.ts";
 export type TestDefinition = Omit<Deno.TestDefinition, "fn"> & {
  fn: TestFunction;
  target?: "vim" | "nvim" | "all" | "any";
+ delay?: number;
 };
 
 type TestOptions = Omit<TestDefinition, "name" | "fn">;
@@ -75,6 +77,10 @@ function runTest(t: TestDefinition) {
 
       for (const fn of denocy.fns) {
         await fn(denops);
+
+        if (t.delay) {
+          await delay(t.delay);
+        }
       }
     },
     pluginName: "denocy",

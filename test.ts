@@ -102,3 +102,8 @@ test("moveTo", (vim) => {
     assertEquals(pos[2], 3);
   });
 });
+
+test("delay option", { delay: 100 }, (vim) => {
+  vim.should.exist();
+  vim.popup.should.not.exist();
+});

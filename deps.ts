@@ -7,6 +7,7 @@ export { delay } from "https://deno.land/std@0.139.0/async/mod.ts";
 export type { Denops } from "https://deno.land/x/denops_std@v3.3.1/mod.ts";
 export * as vim from "https://deno.land/x/denops_std@v3.3.1/function/mod.ts";
 export { execute } from "https://deno.land/x/denops_std@v3.3.1/helper/mod.ts";
+export { emit } from "https://deno.land/x/denops_std@v3.3.1/autocmd/mod.ts";
 
 // Deno third party modules
 export { 
