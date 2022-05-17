@@ -14,7 +14,7 @@ export abstract class DenocyObject {
 
   abstract moveTo: (content: string | RegExp) => void;
 
-  abstract echo: (str?: string) => void;
+  abstract echo: (expr?: string) => void;
 }
 
 type DenopsFunction = (denops: Denops) => unknown;
@@ -41,9 +41,9 @@ export class DenocyContext extends DenocyObject implements Denocy {
     denops => denops.cmd(`edit ${filePath}`)
   );
 
-  echo = (str?: string) => this.register(async denops => {
-    if (str) {
-      const result = await denops.eval(str);
+  echo = (expr?: string) => this.register(async denops => {
+    if (expr) {
+      const result = await denops.eval(expr);
       console.log(result);
     }
     else {
