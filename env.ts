@@ -59,7 +59,7 @@ if (srcDirEntry) {
 }
 
 //
-// Setup dependencies (denops and denops-popup)
+// Setup denops.vim
 //
 const homePath = Deno.env.get("HOME");
 if (!homePath) {
