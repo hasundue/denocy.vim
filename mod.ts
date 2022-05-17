@@ -13,6 +13,7 @@ export type TestDefinition = Omit<Deno.TestDefinition, "fn"> & {
  fn: TestFunction;
  target?: "vim" | "nvim" | "all" | "any";
  delay?: number;
+ timeout?: number;
 };
 
 type TestOptions = Omit<TestDefinition, "name" | "fn">;
@@ -83,6 +84,7 @@ function runTest(t: TestDefinition) {
         }
       }
     },
+    timeout: t.timeout,
     pluginName: "denocy",
     prelude: pluginName ? [`set runtimepath^=${Deno.cwd()}`] : undefined,
   });

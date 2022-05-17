@@ -107,3 +107,8 @@ test("delay option", { delay: 100 }, (vim) => {
   vim.should.exist();
   vim.popup.should.not.exist();
 });
+
+test("timeout option", { delay: 100, timeout: 300 }, (vim) => {
+  vim.should.exist();
+  vim.popup.should.not.exist();
+});
