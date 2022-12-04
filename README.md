@@ -1,10 +1,7 @@
 # denocy.vim
+An end-to-end testing library for Vim/Neovim powered by [denops.vim](https://github.com/vim-denops/denops.vim), inspired by modern Javascript testing frameworks like [Cypress](https://docs.cypress.io/).
 
 ![screenshot](https://i.gyazo.com/7f59d885f55df5a78ddfe88f06c8b340.png)
-
-## Introduction
-
-An end-to-end testing library for Vim/Neovim, inspired by modern Javascript testing frameworks like [Cypress](https://docs.cypress.io/), and powered by [denops.vim](https://github.com/vim-denops/denops.vim).
 
 ## Key Features
 - Pseudo-Synchronous API
@@ -37,6 +34,8 @@ Path to Neovim executable (default: nvim)
 Path to a cloned repository of denops.vim (default: ~/.cache/denocy/denops.vim)
 
 ## Getting Started
+
+### Use Denocy
 
 ```typescript
 import { test } from "https://pax.deno.dev/hasundue/denocy.vim/mod.ts";
