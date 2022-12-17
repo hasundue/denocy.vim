@@ -5,7 +5,7 @@ import { delay } from "./deps.ts";
 import "./env.ts";
 // We have to import denops_std dynamically because it should be done after environment
 // variables are set by env.ts
-const Denops = await import("https://deno.land/x/denops_std@v3.11.1/test/mod.ts");
+const Denops = await import("https://deno.land/x/denops_std@v3.12.0/test/mod.ts");
 
 import { Denocy, DenocyContext } from "./denocy.ts";
 
