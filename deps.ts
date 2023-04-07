@@ -4,10 +4,10 @@ export { delay } from "https://deno.land/std@0.182.0/async/mod.ts";
 
 
 // Denops standard module
-export type { Denops } from "https://deno.land/x/denops_std@v4.1.0/mod.ts";
-export * as vim from "https://deno.land/x/denops_std@v4.1.0/function/mod.ts";
-export { execute } from "https://deno.land/x/denops_std@v4.1.0/helper/mod.ts";
-export { emit } from "https://deno.land/x/denops_std@v4.1.0/autocmd/mod.ts";
+export type { Denops } from "https://deno.land/x/denops_std@v4.1.1/mod.ts";
+export * as vim from "https://deno.land/x/denops_std@v4.1.1/function/mod.ts";
+export { execute } from "https://deno.land/x/denops_std@v4.1.1/helper/mod.ts";
+export { emit } from "https://deno.land/x/denops_std@v4.1.1/autocmd/mod.ts";
 
 // Deno third party modules
 export { 
