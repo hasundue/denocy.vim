@@ -1,5 +1,5 @@
-import { join } from "https://deno.land/std@0.185.0/path/mod.ts";
-import { ensureDirSync } from "https://deno.land/std@0.185.0/fs/mod.ts";
+import { join } from "https://deno.land/std@0.186.0/path/mod.ts";
+import { ensureDirSync } from "https://deno.land/std@0.186.0/fs/mod.ts";
 
 // Set DENOPS_TEST_VIM and DENOPS_TEST_NVIM
 for (const cmd of ["vim", "nvim"]) {
