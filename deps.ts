@@ -15,6 +15,6 @@ export {
   assertArray,
   assertLike,
   ensureNumber,
-} from "https://deno.land/x/unknownutil@v2.1.1/mod.ts";
+} from "https://deno.land/x/unknownutil@v3.0.0/mod.ts";
 
 export * as popup from "https://deno.land/x/denops_popup@v2.2.0/mod.ts";
