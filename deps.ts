@@ -1,6 +1,6 @@
 // Deno standard libraries
-export { assert, assertEquals, AssertionError } from "https://deno.land/std@0.197.0/testing/asserts.ts";
-export { delay } from "https://deno.land/std@0.197.0/async/mod.ts";
+export { assert, assertEquals, AssertionError } from "https://deno.land/std@0.198.0/testing/asserts.ts";
+export { delay } from "https://deno.land/std@0.198.0/async/mod.ts";
 
 
 // Denops standard module
