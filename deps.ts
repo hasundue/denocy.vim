@@ -1,6 +1,6 @@
 // Deno standard libraries
-export { assert, assertEquals, AssertionError } from "https://deno.land/std@0.202.0/testing/asserts.ts";
-export { delay } from "https://deno.land/std@0.202.0/async/mod.ts";
+export { assert, assertEquals, AssertionError } from "https://deno.land/std@0.204.0/testing/asserts.ts";
+export { delay } from "https://deno.land/std@0.204.0/async/mod.ts";
 
 
 // Denops standard module
@@ -15,6 +15,6 @@ export {
   assertArray,
   assertLike,
   ensureNumber,
-} from "https://deno.land/x/unknownutil@v3.8.0/mod.ts";
+} from "https://deno.land/x/unknownutil@v3.9.0/mod.ts";
 
 export * as popup from "https://deno.land/x/denops_popup@v2.2.0/mod.ts";
